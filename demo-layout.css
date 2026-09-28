@@ -1,13 +1,38 @@
-/* The real voice call opens independently of the illustrated brain sequence. */
-.live-voice-launch { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin: 0 auto 14px; max-width: 1200px; }
-.live-voice-launch button { border: 1px solid #ff965d; border-radius: 10px; padding: 12px 18px; background: #ff5722; color: white; font-weight: 750; box-shadow: 0 9px 28px #ff572233; }
-.live-voice-launch button:hover { background: #e94c1c; }
-.live-voice-launch > span { color: #b79886; font-size: 11px; }
-#liveRoseVoice .wr-ai { inset: 0; width: 100vw; height: 100dvh; display: grid; place-items: center; background: #080403c9; }
-#liveRoseVoice .wr-ai:not(:has(.wr-panel.open)) { display: none; }
-#liveRoseVoice .wr-ai:before, #liveRoseVoice .wr-fab { display: none !important; }
-#liveRoseVoice .wr-panel { position: relative; right: auto; bottom: auto; max-height: calc(100dvh - 24px); }
-@media (max-width: 760px) { .live-voice-launch { justify-content: center; flex-wrap: wrap; gap: 8px; } }
+/* The Wildrose homepage header and hero sit above the independent illustrated demo. */
+.wr-site-wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.wr-site-nav { background: #000; border-bottom: 1px solid #ffffff1a; padding: 16px 0; }
+.wr-site-nav .wr-site-wrap { display: flex; justify-content: space-between; align-items: center; }
+.wr-site-nav a { text-decoration: none; color: #fff; font-size: 14px; font-weight: 650; }
+.wr-site-brand { display: flex; align-items: center; gap: 10px; font-size: 18px !important; font-weight: 800 !important; letter-spacing: -.3px; }
+.wr-site-brand img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; }
+.wr-site-links { display: flex; gap: 36px; }
+.wr-site-links a { color: #c7c7c7; }
+.wr-site-buy { background: #ff5722; padding: 14px 25px; border-radius: 40px; }
+.wr-site-hero { color: #fff; background: #000; position: relative; overflow: hidden; padding: 74px 0 118px; border-bottom: 1px solid #ffffff18; }
+.wr-site-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 36%, #ff57223d, transparent 27%), linear-gradient(#050505, #000 46%, #000); pointer-events: none; }
+.wr-site-hero-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.wr-site-label { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 18px; padding: 8px 14px; border-radius: 980px; background: #ffffff14; border: 1px solid #ffffff24; color: #ffffffb8; font-size: 13px; font-weight: 600; }
+.wr-site-label span { width: 8px; height: 8px; border-radius: 50%; background: #ff5722; box-shadow: 0 0 18px #ff5722d9; }
+.wr-site-hero h1 { max-width: 1060px; margin: 0 auto 26px; font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size: clamp(56px,10vw,118px); line-height: .94; letter-spacing: -.075em; font-weight: 650; }
+.wr-site-hero h1 em { display: block; font-family: inherit; font-style: normal; color: #ffffff9e; font-weight: 500; }
+.wr-site-lead { max-width: 790px; margin: 0 auto 34px; color: #ffffffad; font-size: clamp(21px,2.4vw,30px); line-height: 1.24; letter-spacing: -.026em; }
+.wr-site-cta { display: inline-block; padding: 14px 24px; color: #ffb199; background: #000; border: 1px solid #ff5722c7; border-radius: 40px; text-decoration: none; font-size: 14px; font-weight: 700; }
+.wr-site-cta:hover { background: #ff57221a; color: #fff; }
+.wr-site-widget { position: relative; display: flex; align-items: center; justify-content: center; width: min(460px,94vw); min-height: 560px; margin: 54px auto 0; }
+.wr-site-widget::before { content: ''; position: absolute; inset: -22px -46px; background: radial-gradient(circle, #ff572238, transparent 58%); pointer-events: none; }
+#liveRoseVoice .wr-ai.inline { position: relative; inset: auto; margin: auto; }
+#liveRoseVoice .wr-ai.inline .wr-panel { position: relative; right: auto; bottom: auto; }
+#liveRoseVoice .wr-fab, #liveRoseVoice .wr-close { display: none !important; }
+@media (max-width: 760px) {
+  .wr-site-nav .wr-site-wrap { gap: 12px; }
+  .wr-site-links { display: none; }
+  .wr-site-buy { padding: 11px 16px; }
+  .wr-site-hero { padding: 70px 0 90px; }
+  .wr-site-hero h1 { font-size: clamp(47px, 10.4vw, 72px); }
+  .wr-site-widget { width: min(460px,100%); min-height: 540px; margin-top: 46px; }
+}
+/* The widget's own main regions must not inherit the demo shell padding. */
+#liveRoseVoice main, #roseWidget main { padding: 0; }
 /* Three clear visuals above one shared conversation strip. */
 .intro { gap: clamp(32px, 5vw, 72px); margin-bottom: 40px; }
 .stage { height: auto; padding: 24px clamp(20px, 2.6vw, 36px); }
