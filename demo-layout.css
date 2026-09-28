@@ -86,3 +86,18 @@
 }
 
 @media (prefers-reduced-motion: reduce) { .conversation-line, .conversation-speaker, .person-label { transition: none; } }
+
+/* Let the electrical route carry the movement, with steady surrounding UI. */
+.person-art, .person-art .front-arm, .person-art .front-leg { animation: none; }
+.workflow-card { animation: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.workflow-card.working .wf-state:before { animation: none; }
+.conversation-line { min-height: 100px; align-items: center; }
+.conversation-line p { min-height: 60px; display: flex; align-items: center; }
+@media(max-width:760px) {
+  .conversation-line { min-height: 112px; }
+  .conversation-line p { min-height: 80px; }
+}
+@media(max-width:359px) {
+  .conversation-line { grid-template-rows: 12px minmax(88px,auto); }
+  .conversation-line p { min-height: 88px; }
+}

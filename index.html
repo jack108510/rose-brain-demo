@@ -156,8 +156,8 @@
     @media(min-width:761px) and (max-width:1150px){.person{bottom:215px}.visitor-bubble{bottom:550px}}
     .anatomy-surface{z-index:0}#workflowGraph{z-index:1;pointer-events:auto;cursor:grab;touch-action:pan-y}#workflowGraph.dragging{cursor:grabbing}#workflowGraph:focus-visible{outline:1px solid #df9a72;outline-offset:-6px;border-radius:18px}.brain-hint{position:absolute;top:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#c59a83;pointer-events:none;white-space:nowrap;z-index:2}
   </style>
-  <link rel="stylesheet" href="rose-appearance.css?v=rose-reference-1">
-  <link rel="stylesheet" href="demo-layout.css?v=conversation-strip-1">
+  <link rel="stylesheet" href="rose-appearance.css?v=calm-1">
+  <link rel="stylesheet" href="demo-layout.css?v=calm-1">
 </head>
 <body>
   <header class="site-head shell"><a class="brand" href="./"><img src="wildrose.png" alt="">Wildrose <span>/ Rose</span></a><span class="head-tag">Conversation preview</span></header>
@@ -182,8 +182,8 @@
     </section>
     <nav class="scenarios" aria-label="Example conversations"><span class="scenarios-label">Explore examples</span><button type="button" data-scene="0" class="active">Quote request</button><button type="button" data-scene="1">Appointment</button><button type="button" data-scene="2">Service question</button><button type="button" data-scene="3">Job status</button></nav>
   </main>
-  <script src="brain-3d.js?v=spacing-1"></script>
-  <script src="rose-simulated-widget.js" data-mount="#roseWidget" data-inline="true" data-default-view="voice" data-title="Rose" data-accent="#ff5722" data-logo="wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations."></script>
+  <script src="brain-3d.js?v=calm-1"></script>
+  <script src="rose-simulated-widget.js?v=calm-1" data-mount="#roseWidget" data-inline="true" data-default-view="voice" data-title="Rose" data-accent="#ff5722" data-logo="wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations."></script>
   <script>
     (async()=>{
       const scenarios=[
@@ -2654,9 +2654,24 @@
       exampleNav.querySelectorAll('button').forEach(button=>button.remove());
       scenarios.forEach((scene,i)=>{const button=document.createElement('button');button.type='button';button.dataset.scene=i;button.textContent=scene.label||pinnedLabels[i];exampleNav.append(button)});
       const studio=document.querySelector('#stage'),visitor=document.querySelector('#visitorSpeech'),rose=document.querySelector('#roseSpeech'),toolList=document.querySelector('#toolList'),workflowCard=document.querySelector('#workflowCard'),widget=document.querySelector('#roseWidget');
-      const pause=document.querySelector('#pause'),duration=16000,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const pause=document.querySelector('#pause'),duration=18000,playbackRate=.35,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const logos={"Rose": "wildrose.png", "Knowledge": "icons/knowledge.svg", "Calendar": "icons/googlecalendar.svg", "HubSpot": "icons/hubspot.svg", "Gmail": "icons/gmail.svg", "Twilio": "icons/twilio.svg", "Notion": "icons/notion.svg", "Airtable": "icons/airtable.svg", "Stripe": "icons/stripe.svg", "Shopify": "icons/shopify.svg", "Zendesk": "icons/zendesk.svg", "Asana": "icons/asana.svg", "Trello": "icons/trello.svg", "ClickUp": "icons/clickup.svg", "Zoom": "icons/zoom.svg", "Calendly": "icons/calendly.svg", "Sheets": "icons/googlesheets.svg", "Drive": "icons/googledrive.svg", "QuickBooks": "icons/quickbooks.svg", "Mailchimp": "icons/mailchimp.svg", "Discord": "icons/discord.svg", "Intercom": "icons/intercom.svg", "GitHub": "icons/github.svg", "Typeform": "icons/typeform.svg", "Zapier": "icons/zapier.svg", "Slack": "icons/slack.svg", "Salesforce": "icons/salesforce.svg", "Monday": "icons/mondaydotcom.svg", "Teams": "icons/microsoftteams.svg", "Outlook": "icons/microsoftoutlook.svg", "DocuSign": "icons/docusign.svg"};
-      let index=Math.floor(Math.random()*scenarios.length),time=0,playing=!reduced,last=performance.now(),shownFrame=-1;
+      // Reserve transcript space for the longest lines at the current width.
+      // New sentences should not push the rest of the page around.
+      const conversation=document.querySelector('#conversation');let measuredConversationWidth=-1;
+      function reserveConversationSpace(){
+        const width=conversation.clientWidth;if(width===measuredConversationWidth)return;measuredConversationWidth=width;
+        const probe=document.createElement('div');probe.style.cssText='position:fixed;left:-10000px;top:0;visibility:hidden;pointer-events:none;white-space:normal';document.body.append(probe);
+        for(const [who,element] of [['visitor',visitor],['rose',rose]]){
+          const style=getComputedStyle(element);probe.style.width=element.clientWidth+'px';probe.style.font=style.font;probe.style.letterSpacing=style.letterSpacing;
+          let height=innerWidth<360?88:innerWidth<=760?80:60;
+          for(const line of scenarios.flatMap(scene=>scene.lines).filter(line=>line.who===who)){probe.textContent=line.text;height=Math.max(height,probe.getBoundingClientRect().height)}
+          element.style.minHeight=Math.ceil(height)+'px';
+        }
+        probe.remove();
+      }
+      reserveConversationSpace();new ResizeObserver(reserveConversationSpace).observe(conversation);
+      let index=Math.floor(Math.random()*scenarios.length),time=0,playing=!reduced,shownFrame=-1;
       let shuffleBag=[],simulationEnded=false;
       function pickExample(){
         if(!shuffleBag.length){shuffleBag=scenarios.map((_,i)=>i).filter(i=>i!==index);for(let i=shuffleBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffleBag[i],shuffleBag[j]]=[shuffleBag[j],shuffleBag[i]]}}
@@ -2688,10 +2703,14 @@
         if(routeTool!==frame.tool){const start=routePath.at(-1)??0;routePath=shortestRoute(start,toolNode[frame.tool]??0);routeTool=frame.tool;routeStartedAt=time}
         graphCanvas.dataset.tool=frame.tool;graphCanvas.dataset.routeBulb=String(routePath.at(-1));graphCanvas.dataset.routeLength=String(routePath.length);
       }
-      let graphWidth=0,graphHeight=0,graphClock=0,graphLast=performance.now();
-      function sizeGraph(){const rect=graphCanvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);graphWidth=rect.width;graphHeight=rect.height;graphCanvas.width=Math.round(graphWidth*ratio);graphCanvas.height=Math.round(graphHeight*ratio);graphContext.setTransform(ratio,0,0,ratio,0,0)}
+      let graphWidth=0,graphHeight=0,graphClock=0,graphLast=performance.now(),uiKey='',baseRevision=-1;
+      const baseCanvas=document.createElement('canvas'),baseContext=baseCanvas.getContext('2d');
+      function sizeGraph(){const rect=graphCanvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);graphWidth=rect.width;graphHeight=rect.height;graphCanvas.width=Math.round(graphWidth*ratio);graphCanvas.height=Math.round(graphHeight*ratio);graphContext.setTransform(ratio,0,0,ratio,0,0);baseRevision=-1}
       function drawGraph(now){
-        const delta=Math.min(Math.max(now-graphLast,0),60);graphLast=now;if(playing&&!document.hidden&&!reduced)graphClock+=delta;
+        const delta=Math.min(Math.max(now-graphLast,0),100);graphLast=now;
+        if(playing&&!document.hidden&&!reduced){graphClock+=delta;time+=delta*playbackRate;if(time>=duration)next()}
+        const timelineKey=[index,scenarios[index].lines.filter(line=>line.at<=time).length,workflowFrames[index].filter(item=>item.at<=time).length,Math.floor(time/150),playing,simulationEnded].join(':');
+        if(timelineKey!==uiKey){uiKey=timelineKey;render()}
         if(!graphWidth||!graphHeight)sizeGraph();
         const ctx=graphContext,frame=workflowFrames[index].filter(item=>item.at<=time).at(-1),active=toolNode[frame.tool]??0;
         const completed=new Set(scenarios[index].tools.filter(tool=>time>=tool.at).map(tool=>tool.name));
@@ -2699,7 +2718,19 @@
         const projected=RoseBrain3D.project(brainModel,graphWidth,graphHeight,graphClock),point=i=>projected[i];
         ctx.clearRect(0,0,graphWidth,graphHeight);
         RoseBrain3D.paint(ctx,brainModel,projected,graphWidth,graphHeight);
-        for(const [a,b] of webEdges){const p=point(a),q=point(b),front=(p.z+q.z)/2>0;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=front?'#ffc59b30':'#efa16819';ctx.lineWidth=front?.65:.45;ctx.stroke()}
+        // Cache the stationary network; only electrical pulses change each frame.
+        if(baseRevision!==brainModel.revision){
+          baseCanvas.width=graphCanvas.width;baseCanvas.height=graphCanvas.height;
+          baseContext.setTransform(graphCanvas.width/graphWidth,0,0,graphCanvas.height/graphHeight,0,0);
+          for(const [a,b] of webEdges){const p=point(a),q=point(b),front=(p.z+q.z)/2>0;baseContext.beginPath();baseContext.moveTo(p.x,p.y);baseContext.lineTo(q.x,q.y);baseContext.strokeStyle=front?'#ffc59b25':'#efa16814';baseContext.lineWidth=front?.65:.45;baseContext.stroke()}
+          for(let i=0;i<webNodes.length;i++){
+            const p=point(i),name=bulbNames.get(i),radius=(name?2.7:i%11===0?1.2:.65)*scale*p.perspective;
+            baseContext.beginPath();baseContext.arc(p.x,p.y,radius,0,Math.PI*2);baseContext.fillStyle=p.z>0?'#ef9d6345':'#ef9d6320';baseContext.fill();
+            if(name){baseContext.beginPath();baseContext.arc(p.x,p.y,radius+2.5*scale,0,Math.PI*2);baseContext.strokeStyle='#efa66a35';baseContext.lineWidth=.7;baseContext.stroke()}
+          }
+          baseRevision=brainModel.revision;
+        }
+        ctx.drawImage(baseCanvas,0,0,graphWidth,graphHeight);
         // The tracer actually walks the connected mesh from the previous tool to the next.
         const routePoints=routePath.map(point),lengths=routePoints.slice(1).map((p,i)=>Math.hypot(p.x-routePoints[i].x,p.y-routePoints[i].y)),total=lengths.reduce((a,b)=>a+b,0);
         const elapsed=Math.max(0,time-routeStartedAt),arrival=Math.min(1,elapsed/1100),distance=total*arrival;
@@ -2715,8 +2746,8 @@
         if(arrival===1&&total>0){for(let impulse=0;impulse<3;impulse++){const d=((elapsed-1100)*.0003+impulse/3)%1*total;let segmentStart=0;for(let n=0;n<lengths.length;n++){if(d<=segmentStart+lengths[n]){const t=(d-segmentStart)/lengths[n],p=routePoints[n],q=routePoints[n+1];ctx.beginPath();ctx.arc(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,2*scale,0,Math.PI*2);ctx.fillStyle='#fff0ce';ctx.shadowBlur=10;ctx.shadowColor='#ffa15d';ctx.fill();ctx.shadowBlur=0;break}segmentStart+=lengths[n]}}}
         // Small background discharges travel through the interior; the selected
         // workflow route stays brightest and follows the current tool event.
-        for(let lane=0;lane<5;lane++){
-          const phase=graphClock/1250+lane*.23,cycle=Math.floor(phase),t=phase-cycle;
+        for(let lane=0;lane<3;lane++){
+          const phase=graphClock/3600+lane*.33,cycle=Math.floor(phase),t=phase-cycle;
           const [a,b]=webEdges[(cycle*31+lane*137)%webEdges.length],p=point(a),q=point(b);
           const tail=Math.max(0,t-.22),alpha=Math.sin(t*Math.PI)*.65;
           ctx.beginPath();ctx.moveTo(p.x+(q.x-p.x)*tail,p.y+(q.y-p.y)*tail);ctx.lineTo(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t);
@@ -2725,9 +2756,10 @@
         }
         const routeSet=new Set(routePath);
         for(let i=0;i<webNodes.length;i++){
-          const p=point(i),name=bulbNames.get(i),hot=i===active,done=completed.has(name),onRoute=routeSet.has(i),twinkle=.5+.5*Math.sin(graphClock*.0016+i*1.4);
+          const p=point(i),name=bulbNames.get(i),hot=i===active,done=completed.has(name),onRoute=routeSet.has(i);
+          if(!hot&&!done&&!onRoute)continue;
           const radius=(hot?6:name?3.4:i%11===0?1.6:.65)*scale*p.perspective;
-          ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fillStyle=hot?'#fff0d0':done?'#ffd2a0':onRoute?'#ffc990':`rgba(239,157,99,${p.z>0?.22+twinkle*.30:.12+twinkle*.10})`;ctx.shadowBlur=hot?20:done?8:0;ctx.shadowColor='#ff9444';ctx.fill();ctx.shadowBlur=0;
+          ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fillStyle=hot?'#fff0d0':done?'#ffd2a0':onRoute?'#ffc990':'#ef9d6330';ctx.shadowBlur=hot?20:done?8:0;ctx.shadowColor='#ff9444';ctx.fill();ctx.shadowBlur=0;
           if(name||i%13===0){ctx.beginPath();ctx.arc(p.x,p.y,radius+(hot?5:2.5)*scale,0,Math.PI*2);ctx.strokeStyle=hot?'#ffdcab99':done?'#ffb77b77':'#efa66a3d';ctx.lineWidth=.7;ctx.stroke()}
         }
         if(head&&arrival<1){ctx.beginPath();ctx.arc(head.x,head.y,3.5*scale,0,Math.PI*2);ctx.fillStyle='#fff7de';ctx.shadowBlur=20;ctx.shadowColor='#ff984c';ctx.fill();ctx.shadowBlur=0}
@@ -2740,7 +2772,9 @@
         activateTool(frame);
         workflowCard.dataset.tool=frame.tool;
         workflowCard.className=`workflow-card ${frame.kind} ${frame.state}`;
-        workflowCard.innerHTML=`<div class="wf-head"><span class="wf-mark"><img src="${logos[frame.tool]}" alt=""></span><span class="wf-tool">${frame.tool}</span><span class="wf-state">${frame.verb}</span></div><h2 class="wf-title">${frame.title}</h2>`;
+        if(!workflowCard.firstElementChild)workflowCard.innerHTML='<div class="wf-head"><span class="wf-mark"><img alt=""></span><span class="wf-tool"></span><span class="wf-state"></span></div><h2 class="wf-title"></h2>';
+        const icon=workflowCard.querySelector('img');if(icon.getAttribute('src')!==logos[frame.tool])icon.src=logos[frame.tool];
+        for(const [selector,value] of [['.wf-tool',frame.tool],['.wf-state',frame.verb],['.wf-title',frame.title]]){const el=workflowCard.querySelector(selector);if(el.textContent!==value)el.textContent=value}
       }
       function reset(){
         time=reduced?15000:0;shownFrame=-1;simulationEnded=false;toolList.replaceChildren();
@@ -2748,7 +2782,7 @@
         for(const tool of scenarios[index].tools){const el=document.createElement('div');el.className='tool';el.dataset.name=tool.name;const copy=document.createElement('div'),name=document.createElement('strong'),status=document.createElement('span');name.textContent=tool.name;status.textContent='READY';copy.append(name,status);el.append(copy);toolList.append(el)}
         document.querySelector('#sceneName').textContent=scenarios[index].name;
         document.querySelector('#scenarioCount').textContent=String(index+1).padStart(2,'0')+' / '+String(scenarios.length).padStart(2,'0');
-        document.querySelectorAll('[data-scene]').forEach(button=>button.classList.toggle('active',Number(button.dataset.scene)===index));last=performance.now();render();if(reduced)drawGraph(performance.now());
+        document.querySelectorAll('[data-scene]').forEach(button=>button.classList.toggle('active',Number(button.dataset.scene)===index));graphLast=performance.now();uiKey='';render();if(reduced)drawGraph(performance.now());
       }
       function render(){
         const scene=scenarios[index],lines=scene.lines.filter(line=>line.at<=time),latest=lines.at(-1),latestVisitor=lines.filter(line=>line.who==='visitor').at(-1),latestRose=lines.filter(line=>line.who==='rose').at(-1);
@@ -2772,13 +2806,12 @@
 
         for(const tool of scene.tools){const el=[...toolList.children].find(item=>item.dataset.name===tool.name);const done=time>=tool.at,working=!done&&frame.tool===tool.name&&frame.state==='working';el.classList.toggle('active',done);el.classList.toggle('working',working);el.querySelector('span').textContent=done?tool.status:working?frame.verb:'READY'}
         document.querySelector('#caption').textContent=simulationEnded?'Demo paused':workflowCurrent?`${frame.tool} · ${frame.verb}`:phase==='speaking'?'Rose is replying':phase==='thinking'?'Rose is thinking':'Listening to the customer';
-        document.querySelector('#clock').textContent='00:'+String(Math.floor(time/1000)).padStart(2,'0');
+        const elapsed=Math.floor(time/playbackRate/1000);document.querySelector('#clock').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
       }
       function resume(){playing=!reduced;pause.textContent=playing?'Pause Ⅱ':'Play ▶';pause.setAttribute('aria-label',playing?'Pause animation':'Play animation')}
       function next(){index=pickExample();resume();reset()}
       reset();
       if(reduced){pause.hidden=true}else{
-        setInterval(()=>{const now=performance.now(),delta=now-last;last=now;if(!playing||document.hidden)return;time+=delta;if(time>=duration){next();return}render()},60);
         pause.addEventListener('click',()=>{playing=!playing;pause.textContent=playing?'Pause Ⅱ':'Play ▶';pause.setAttribute('aria-label',playing?'Pause animation':'Play animation');render()});
       }
       document.querySelector('#next').addEventListener('click',next);

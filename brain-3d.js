@@ -66,7 +66,7 @@
       });
       // A depth-only pass keeps rear folds from piling up into a bright tangle.
       // The visible pass remains transparent, and signals render through it.
-      const depth = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ colorWrite: false }));
+      const depth = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ colorWrite: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }));
       group.add(depth);
       const mesh = new THREE.Mesh(geometry, material); mesh.renderOrder = 1;
       group.add(mesh);
@@ -91,7 +91,7 @@
       // One connection to an earlier node guarantees every tool is reachable.
       if (i) connect(i, nearest.find(n => n.j < i).j);
     }
-    const model = { nodes, edges, renderer, scene, group, camera, width: 0, height: 0, vector: new THREE.Vector3(), yaw: 0, pitch: 0, dragging: false };
+    const model = { nodes, edges, renderer, scene, group, camera, width: 0, height: 0, vector: new THREE.Vector3(), yaw: 0, pitch: 0, dragging: false, revision: 0, dirty: true, projected: null };
     const canvas = document.querySelector('#workflowGraph');
     let pointer = null;
     canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0;
@@ -123,26 +123,31 @@
   function project(model, width, height, clock) {
     const size = Math.min(width * .81, height * .67);
     if (model.width !== width || model.height !== height) {
-      model.width = width; model.height = height;
+      model.width = width; model.height = height; model.dirty = true; model.revision++;
       model.renderer.setSize(width, height, false);
       model.camera.aspect = width / height;
       model.camera.fov = 2 * Math.atan(height / (2 * size * 3.5)) * 180 / Math.PI;
       model.camera.updateProjectionMatrix();
       model.camera.updateMatrixWorld();
     }
-    model.group.rotation.set(.24 + model.pitch, -.72 + model.yaw + Math.sin(clock * .00016) * .18, -.06);
+    const pitch = .24 + model.pitch, yaw = -.72 + model.yaw;
+    if (model.group.rotation.x !== pitch || model.group.rotation.y !== yaw) {
+      model.group.rotation.set(pitch, yaw, -.06); model.dirty = true; model.revision++;
+    }
+    if (model.projected && model.projectedRevision === model.revision) return model.projected;
     model.group.position.y = 0;
     model.group.updateMatrixWorld(true);
-    return model.nodes.map(n => {
+    model.projected = model.nodes.map(n => {
       const v = model.vector.set(n.x, n.y, n.z).applyMatrix4(model.group.matrixWorld);
       const depth = v.z, perspective = 3.5 / (3.5 - depth);
       v.project(model.camera);
       return { x: (v.x + 1) * width / 2, y: (1 - v.y) * height / 2, z: depth, perspective };
     });
+    model.projectedRevision = model.revision; return model.projected;
   }
 
   function paint(ctx, model, points, width, height) {
-    model.renderer.render(model.scene, model.camera);
+    if (model.dirty) { model.renderer.render(model.scene, model.camera); model.dirty = false; }
     ctx.save(); ctx.translate(width * .5, height * .735); ctx.scale(1, .14);
     const floor = ctx.createRadialGradient(0, 0, 1, 0, 0, width * .38);
     floor.addColorStop(0, '#07030290'); floor.addColorStop(1, '#07030200');
