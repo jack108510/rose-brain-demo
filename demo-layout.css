@@ -1,65 +1,48 @@
-/* Shared columns and rows keep customer, Rose, and workflow centered together. */
+/* Three clear visuals above one shared conversation strip. */
 .intro { gap: clamp(32px, 5vw, 72px); margin-bottom: 40px; }
 .stage { height: auto; padding: 24px clamp(20px, 2.6vw, 36px); }
 .scene-meta { position: relative; inset: auto; gap: 16px; min-height: 34px; }
-.demo-layout {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: auto 560px;
-  gap: 24px clamp(24px, 3vw, 44px);
-  margin: 32px 0 24px;
-}
-.demo-column, .flow {
-  display: grid;
-  grid-template-rows: subgrid;
-  grid-row: span 2;
-  min-width: 0;
-}
-.bubble {
-  position: relative; inset: auto;
-  width: 100%; max-width: none; min-height: 100px;
-  margin: 0; padding: 18px 20px;
-  font-size: clamp(16px, 1.35vw, 19px); line-height: 1.42;
-  align-self: stretch;
-}
-.visitor-bubble { transform: none; }
-.visitor-bubble:after, .rose-bubble:after { left: calc(50% - 6px); right: auto; }
-.rose-bubble { transform: none; }
-.stage[data-speaker="visitor"] .rose-bubble { transform: translateY(8px); }
-.person {
-  position: relative; inset: auto;
-  width: 100%; height: 100%;
-  justify-content: center; gap: 16px;
-}
+.demo-layout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: 560px; gap: clamp(24px, 3vw, 44px); margin: 28px 0; }
+.demo-column { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.person { position: relative; inset: auto; width: 100%; height: 100%; justify-content: center; gap: 16px; }
 .person-art { width: 210px; height: 310px; max-width: 80%; }
-.person-label { margin: 0; font-size: 11px; }
-.widget-wrap {
-  position: relative; inset: auto; transform: none;
-  width: 100%; max-width: 382px; justify-self: center;
-}
-.flow { position: relative; inset: auto; width: 100%; height: auto; margin: 0; gap: 24px; }
-.flow:before { inset: 140px -8px 100px; }
-.brain-heading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 100px; }
+.person-label { margin: 0; font-size: 11px; transition: color .2s; }
+.stage[data-dialogue-speaker="visitor"] .person-label { color: #ff9a69; }
+.widget-wrap { position: relative; inset: auto; transform: none; width: 100%; max-width: 382px; }
+.flow { position: relative; inset: auto; display: block; width: 100%; height: 560px; margin: 0; }
+.flow:before { inset: 40px -8px 100px; }
+.brain-heading { position: absolute; top: 8px; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .flow-title, .brain-hint { position: static; inset: auto; transform: none; margin: 0; }
 .flow-title { font-size: 9px; letter-spacing: .18em; }
-.brain-scene { position: relative; min-width: 0; height: 100%; }
-.workflow-card { inset: auto 5% 24px; width: 90%; min-height: 90px; }
-.stage-foot { position: relative; inset: auto; justify-content: space-between; gap: 20px; padding-top: 18px; border-top: 1px solid #ffffff0c; }
-.stage-foot .caption { min-width: 0; max-width: 70%; }
+.brain-scene { position: relative; height: 100%; min-width: 0; }
+.workflow-card { inset: auto 5% 16px; width: 90%; min-height: 90px; }
+.conversation-strip { border: 1px solid #d8946228; border-radius: 16px; background: #ffffff03; overflow: hidden; }
+.conversation-line { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: baseline; gap: 20px; padding: 20px 24px; transition: background .25s; }
+.conversation-line + .conversation-line { border-top: 1px solid #ffffff0a; }
+.conversation-speaker { display: flex; align-items: center; gap: 10px; color: #b6937f; font-size: 10px; font-weight: 750; letter-spacing: .10em; text-transform: uppercase; transition: color .25s; }
+.conversation-speaker i { width: 5px; height: 5px; border-radius: 50%; background: #73503b; flex: none; }
+.conversation-line p { margin: 0; min-width: 0; color: #ead9cd; font-size: clamp(16px, 1.4vw, 20px); line-height: 1.5; font-weight: 500; }
+.conversation-line p.pending { color: #947e70; font-weight: 400; }
+.conversation-strip[data-speaker="visitor"] .customer-line,
+.conversation-strip[data-speaker="rose"] .rose-line { background: #ff9c6810; }
+.conversation-strip[data-speaker="visitor"] .customer-line .conversation-speaker,
+.conversation-strip[data-speaker="rose"] .rose-line .conversation-speaker { color: #ffb184; }
+.conversation-strip[data-speaker="visitor"] .customer-line .conversation-speaker i,
+.conversation-strip[data-speaker="rose"] .rose-line .conversation-speaker i { background: #ffa167; box-shadow: 0 0 10px #ff8b4280; }
+.stage-foot { position: relative; inset: auto; justify-content: space-between; gap: 20px; padding-top: 18px; }
+.stage-foot .caption { min-width: 0; max-width: 70%; font-size: 10px; color: #a18574; }
 .scenarios { margin-top: 20px; padding-bottom: 10px; }
 
 @media (min-width: 1024px) and (max-width: 1199px) {
   .stage { padding-inline: 24px; }
   .demo-layout { column-gap: 24px; }
-  .bubble { font-size: 16px; padding: 16px; }
   .person-art { width: 180px; height: 280px; }
   .workflow-card .wf-head { gap: 7px; }
 }
 
 @media (min-width: 761px) and (max-width: 1023px) {
-  .demo-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 560px auto; gap: 24px 32px; }
-  .flow { grid-column: 1 / -1; grid-row: 3; grid-template-rows: auto 510px; width: min(480px, 100%); justify-self: center; margin-top: 24px; gap: 8px; }
-  .brain-heading { min-height: 64px; }
+  .demo-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 560px 510px; gap: 32px; }
+  .flow { grid-column: 1 / -1; height: 510px; width: min(480px, 100%); justify-self: center; }
   .workflow-card { inset-inline: 8%; width: 84%; bottom: 16px; }
   .intro { grid-template-columns: 1fr; gap: 24px; }
   .intro-aside { display: flex; gap: 32px; align-items: start; }
@@ -76,31 +59,30 @@
   .scene-meta > div { gap: 7px; }
   .scene-name { font-size: 8px; letter-spacing: .09em; }
   .scene-index { font-size: 9px; }
-  .demo-layout { display: flex; flex-direction: column; gap: 36px; margin: 30px 0 22px; }
-  .demo-column { display: grid; grid-template-rows: auto auto; gap: 20px; }
-  .customer-column { grid-template-columns: 86px minmax(0, 1fr); grid-template-rows: auto; column-gap: 18px; align-items: center; }
-  .customer-column .person { grid-column: 1; grid-row: 1; height: auto; gap: 8px; }
-  .person-art { width: 86px; height: 145px; max-width: 100%; }
-  .person-label { font-size: 8px; letter-spacing: .12em; }
-  .customer-column .visitor-bubble { grid-column: 2; grid-row: 1; align-self: center; }
-  .bubble { min-height: 0; padding: 15px 16px; font-size: 16px; }
-  .visitor-bubble:after { left: -7px; right: auto; top: calc(50% - 6px); bottom: auto; border-right: 0; border-bottom: 0; border-left: 1px solid #bc7950; border-top: 1px solid #bc7950; }
+  .demo-layout { display: flex; flex-direction: column; gap: 32px; margin: 28px 0; }
+  .demo-column { width: 100%; }
+  .customer-column .person { flex-direction: row; width: auto; height: auto; gap: 16px; }
+  .person-art { width: 62px; height: 100px; max-width: 100%; }
+  .person-label { font-size: 9px; letter-spacing: .12em; }
   .widget-wrap { max-width: 382px; }
-  .flow { display: grid; grid-template-rows: auto clamp(420px, 118vw, 520px); gap: 12px; width: 100%; margin: 0; }
-  .brain-heading { min-height: 48px; gap: 10px; }
+  .flow { height: clamp(430px, 122vw, 530px); width: 100%; }
+  .brain-heading { top: 0; gap: 10px; }
   .workflow-card { inset-inline: 2%; width: 96%; bottom: 8px; }
+  .conversation-line { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 16px; }
+  .conversation-speaker { font-size: 8px; gap: 7px; letter-spacing: .06em; }
+  .conversation-line p { font-size: 15px; }
   .stage-foot { padding-top: 16px; gap: 12px; }
-  .stage-foot .caption { font-size: 10px; max-width: 62%; }
+  .stage-foot .caption { max-width: 62%; }
   .scenarios { margin-top: 16px; }
 }
 
 @media (max-width: 359px) {
   .shell { width: calc(100% - 20px); }
   .stage { padding-inline: 14px; }
-  .customer-column { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
-  .person-art { width: 64px; height: 120px; }
-  .bubble { font-size: 14px; padding: 13px; }
   .scene-name { font-size: 7px; }
   .scene-meta button { padding: 6px; font-size: 9px; }
   .clock { display: none; }
+  .conversation-line { grid-template-columns: 1fr; gap: 8px; padding: 14px; }
 }
+
+@media (prefers-reduced-motion: reduce) { .conversation-line, .conversation-speaker, .person-label { transition: none; } }

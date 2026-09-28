@@ -157,7 +157,7 @@
     .anatomy-surface{z-index:0}#workflowGraph{z-index:1;pointer-events:auto;cursor:grab;touch-action:pan-y}#workflowGraph.dragging{cursor:grabbing}#workflowGraph:focus-visible{outline:1px solid #df9a72;outline-offset:-6px;border-radius:18px}.brain-hint{position:absolute;top:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#c59a83;pointer-events:none;white-space:nowrap;z-index:2}
   </style>
   <link rel="stylesheet" href="rose-appearance.css?v=rose-reference-1">
-  <link rel="stylesheet" href="demo-layout.css?v=spacing-1">
+  <link rel="stylesheet" href="demo-layout.css?v=conversation-strip-1">
 </head>
 <body>
   <header class="site-head shell"><a class="brand" href="./"><img src="wildrose.png" alt="">Wildrose <span>/ Rose</span></a><span class="head-tag">Conversation preview</span></header>
@@ -167,14 +167,16 @@
       <div class="scene-meta"><div><span class="scene-index" id="scenarioCount">01 / 04</span><span class="scene-name" id="sceneName">QUOTE REQUEST</span></div><div><span class="clock" id="clock">00:00</span><button type="button" id="pause" aria-label="Pause animation">Pause Ⅱ</button></div></div>
       <div class="demo-layout">
         <div class="demo-column customer-column">
-          <div class="bubble visitor-bubble" id="visitorSpeech">Could I get a quote for a repair?</div>
           <div class="person" aria-label="Customer"><div class="person-art" aria-hidden="true"><svg viewBox="0 0 140 190"><ellipse class="ground" cx="70" cy="183" rx="43" ry="5"/><g><circle class="line" cx="70" cy="34" r="20"/><path class="line" d="M70 56v67"/><path class="line" d="M70 70 42 95"/><path class="line front-arm" d="M70 70 101 88"/><path class="line" d="M70 123 43 167"/><path class="line front-leg" d="M70 123 98 167"/></g></svg></div><span class="person-label">Customer</span></div>
         </div>
         <div class="demo-column rose-column">
-          <div class="bubble rose-bubble" id="roseSpeech">Hi! I’m Rose. How can I help?</div>
           <div class="widget-wrap" id="roseWidget"></div>
         </div>
         <div class="flow" id="flow" aria-label="Translucent brain shell with internal electrical signals synchronized to each tool notification"><div class="brain-heading"><div class="flow-title">Rose / workflow map</div><span class="brain-hint">Drag to rotate</span></div><div class="brain-scene"><canvas class="workflow-graph" id="workflowGraph" aria-hidden="true"></canvas><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div></div>
+      </div>
+      <div class="conversation-strip" id="conversation" data-speaker="visitor" aria-label="Current conversation">
+        <div class="conversation-line customer-line"><span class="conversation-speaker"><i aria-hidden="true"></i>Customer</span><p id="visitorSpeech">Could I get a quote for a repair?</p></div>
+        <div class="conversation-line rose-line"><span class="conversation-speaker"><i aria-hidden="true"></i>Rose</span><p id="roseSpeech">Listening…</p></div>
       </div>
       <div class="stage-foot"><span class="caption" id="caption">Customer asks a question</span><button type="button" id="next">Shuffle example ↗</button></div>
     </section>
@@ -2750,8 +2752,10 @@
       }
       function render(){
         const scene=scenarios[index],lines=scene.lines.filter(line=>line.at<=time),latest=lines.at(-1),latestVisitor=lines.filter(line=>line.who==='visitor').at(-1),latestRose=lines.filter(line=>line.who==='rose').at(-1);
-        visitor.textContent=latestVisitor?.text||scene.lines.find(line=>line.who==='visitor').text;
-        rose.textContent=latestRose?.text||'Hi! I’m Rose. How can I help?';
+        const visitorText=latestVisitor?.text||scene.lines.find(line=>line.who==='visitor').text,roseText=latestRose?.text||'Listening…';
+        if(visitor.textContent!==visitorText)visitor.textContent=visitorText;
+        if(rose.textContent!==roseText)rose.textContent=roseText;
+        rose.classList.toggle('pending',!latestRose);
         const frames=workflowFrames[index],frameIndex=frames.findLastIndex(frame=>frame.at<=time),frame=frames[Math.max(frameIndex,0)];
         if(frameIndex!==shownFrame){shownFrame=frameIndex;showWorkflow(frame)}
         const workflowCurrent=frame.at>(latest?.at??-1);
@@ -2761,10 +2765,13 @@
         const nextReply=scene.lines.find(line=>line.who==='rose'&&line.at>time);
         const spokenDuration=Math.min(3100,Math.max(1500,(latest?.text.split(/\s+/).length||0)*230));
         const phase=simulationEnded?'ended':latest?.who==='rose'&&lineAge<spokenDuration?'speaking':latest?.who==='visitor'&&nextReply&&nextReply.at-time<650?'thinking':'listening';
+        const dialogueSpeaker=phase==='speaking'?'rose':latest?.who==='visitor'&&lineAge<spokenDuration?'visitor':'none';
+        document.querySelector('#conversation').dataset.speaker=dialogueSpeaker;
+        studio.dataset.dialogueSpeaker=dialogueSpeaker;
         window.__roseSimulation.update({phase,lines,paused:!playing||reduced});
 
         for(const tool of scene.tools){const el=[...toolList.children].find(item=>item.dataset.name===tool.name);const done=time>=tool.at,working=!done&&frame.tool===tool.name&&frame.state==='working';el.classList.toggle('active',done);el.classList.toggle('working',working);el.querySelector('span').textContent=done?tool.status:working?frame.verb:'READY'}
-        document.querySelector('#caption').textContent=workflowCurrent?frame.title:latest?.caption||'Rose is ready';
+        document.querySelector('#caption').textContent=simulationEnded?'Demo paused':workflowCurrent?`${frame.tool} · ${frame.verb}`:phase==='speaking'?'Rose is replying':phase==='thinking'?'Rose is thinking':'Listening to the customer';
         document.querySelector('#clock').textContent='00:'+String(Math.floor(time/1000)).padStart(2,'0');
       }
       function resume(){playing=!reduced;pause.textContent=playing?'Pause Ⅱ':'Play ▶';pause.setAttribute('aria-label',playing?'Pause animation':'Play animation')}
