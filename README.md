@@ -8,6 +8,8 @@ This is a scripted visual simulation. It makes no API calls, requests no microph
 
 ## Local preview
 
+Rose’s smoky glass panel and copper orb match the supplied C01 campaign references. `rose-appearance.css` contains the shared visual treatment; `assets/rose-voice-reference.jpg` preserves the original reference image and supplies the orb texture through a CSS crop. Keep both together when reusing the appearance on other sites. The conversation and brain simulation behavior is unchanged.
+
 ```sh
 python3 -m http.server 8801 --bind 127.0.0.1
 ```
