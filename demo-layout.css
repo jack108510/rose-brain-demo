@@ -1,3 +1,13 @@
+/* The real voice call opens independently of the illustrated brain sequence. */
+.live-voice-launch { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin: 0 auto 14px; max-width: 1200px; }
+.live-voice-launch button { border: 1px solid #ff965d; border-radius: 10px; padding: 12px 18px; background: #ff5722; color: white; font-weight: 750; box-shadow: 0 9px 28px #ff572233; }
+.live-voice-launch button:hover { background: #e94c1c; }
+.live-voice-launch > span { color: #b79886; font-size: 11px; }
+#liveRoseVoice .wr-ai { inset: 0; width: 100vw; height: 100dvh; display: grid; place-items: center; background: #080403c9; }
+#liveRoseVoice .wr-ai:not(:has(.wr-panel.open)) { display: none; }
+#liveRoseVoice .wr-ai:before, #liveRoseVoice .wr-fab { display: none !important; }
+#liveRoseVoice .wr-panel { position: relative; right: auto; bottom: auto; max-height: calc(100dvh - 24px); }
+@media (max-width: 760px) { .live-voice-launch { justify-content: center; flex-wrap: wrap; gap: 8px; } }
 /* Three clear visuals above one shared conversation strip. */
 .intro { gap: clamp(32px, 5vw, 72px); margin-bottom: 40px; }
 .stage { height: auto; padding: 24px clamp(20px, 2.6vw, 36px); }
