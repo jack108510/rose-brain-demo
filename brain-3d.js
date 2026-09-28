@@ -22,10 +22,6 @@
     renderer.domElement.setAttribute('aria-hidden', 'true');
     document.querySelector('#workflowGraph').before(renderer.domElement);
     scene.add(group);
-    scene.add(new THREE.HemisphereLight(0xffeee4, 0x412b20, 1.6));
-    const key = new THREE.DirectionalLight(0xfff1e8, 3.2); key.position.set(-3, 4, 5); scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffb079, 1.5); rim.position.set(3, 1, -2); scene.add(rim);
-    const fill = new THREE.DirectionalLight(0xffd4c6, .8); fill.position.set(3, -1, 4); scene.add(fill);
     const bounds = new THREE.Box3(), geometries = [];
     for (const item of metadata.meshes) {
       const geometry = new THREE.BufferGeometry();
@@ -42,29 +38,50 @@
     let corticalPositions, corticalNormals;
     for (const { item, geometry } of geometries) {
       geometry.translate(-center.x, -center.y, -center.z); geometry.scale(normalization, normalization, normalization);
-      const color = new THREE.Color(item.name === 'unified-cortex' ? '#dca697' : '#be8b7d');
-      if (item.curvature) {
-        // MRI curvature darkens the actual sulci without drawing invented grooves.
-        const curvature = new Float32Array(binary, item.curvature.offset, item.curvature.count), colors = new Float32Array(item.positions.count * 3);
-        for (let i = 0; i < item.positions.count; i++) {
-          const shade = 1 - Math.max(0, Math.min(.20, curvature[i] * .13));
-          colors[i * 3] = color.r * shade; colors[i * 3 + 1] = color.g * shade; colors[i * 3 + 2] = color.b * shade;
-        }
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      }
-      const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: item.curvature ? '#ffffff' : color, vertexColors: !!item.curvature, roughness: .72, metalness: 0 }));
+      const curvature = item.curvature
+        ? new Float32Array(binary, item.curvature.offset, item.curvature.count)
+        : new Float32Array(item.positions.count);
+      geometry.setAttribute('curvature', new THREE.BufferAttribute(curvature, 1));
+      // A faint translucent shell: grazing angles reveal the outline and folds.
+      // No opaque skin or flesh lighting obscures the electrical network.
+      const material = new THREE.ShaderMaterial({
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+        vertexShader: `
+          attribute float curvature;
+          varying vec3 vNormal; varying vec3 vView; varying float vFold;
+          void main() {
+            vec4 view = modelViewMatrix * vec4(position, 1.0);
+            vNormal = normalize(normalMatrix * normal); vView = -view.xyz;
+            vFold = curvature;
+            gl_Position = projectionMatrix * view;
+          }`,
+        fragmentShader: `
+          varying vec3 vNormal; varying vec3 vView; varying float vFold;
+          void main() {
+            float rim = pow(1.0 - abs(dot(normalize(vNormal), normalize(vView))), 3.2);
+            float fold = clamp(abs(vFold) * .4, 0.0, 1.0);
+            float alpha = .006 + rim * .36 + fold * .012;
+            gl_FragColor = vec4(vec3(1.0, .52, .27), alpha);
+          }`,
+      });
+      // A depth-only pass keeps rear folds from piling up into a bright tangle.
+      // The visible pass remains transparent, and signals render through it.
+      const depth = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ colorWrite: false }));
+      group.add(depth);
+      const mesh = new THREE.Mesh(geometry, material); mesh.renderOrder = 1;
       group.add(mesh);
       if (item.name === 'unified-cortex') { corticalPositions = geometry.attributes.position; corticalNormals = geometry.attributes.normal; }
     }
-    // Sample the real cortical surface for the illustrative workflow network.
+    // Sample the cortex, then inset nodes to form a network inside the shell.
     const candidates = [];
     for (let i = 0; i < corticalPositions.count; i += 11) {
-      if (corticalNormals.getZ(i) * .75 - corticalNormals.getX(i) * .6 + corticalNormals.getY(i) * .3 > .08) candidates.push(i);
+      candidates.push(i);
     }
     const nodes = [];
     for (let i = 0; i < 420; i++) {
       const n = candidates[(i * 137) % candidates.length];
-      nodes.push({ x: corticalPositions.getX(n), y: corticalPositions.getY(n), z: corticalPositions.getZ(n) });
+      const inset = .52 + .46 * ((i * 29) % 101) / 100;
+      nodes.push({ x: corticalPositions.getX(n) * inset, y: corticalPositions.getY(n) * inset, z: corticalPositions.getZ(n) * inset });
     }
     const edges = [], keys = new Set();
     function connect(a, b) { const key = `${Math.min(a,b)}:${Math.max(a,b)}`; if (!keys.has(key)) { keys.add(key); edges.push([a,b]); } }
@@ -79,7 +96,7 @@
     let pointer = null;
     canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0;
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', 'Three-dimensional anatomical brain. Drag or use arrow keys to rotate. Workflow lights follow the conversation.');
+    canvas.setAttribute('aria-label', 'Translucent three-dimensional brain with electrical signals inside. Drag or use arrow keys to rotate. Workflow lights follow the conversation.');
     const changed = () => canvas.dispatchEvent(new Event('rose:brain-change'));
     canvas.addEventListener('pointerdown', event => { if (!event.isPrimary || event.button !== 0) return; pointer = { id: event.pointerId, x: event.clientX, y: event.clientY }; model.dragging = true; canvas.setPointerCapture(event.pointerId); canvas.classList.add('dragging'); });
     canvas.addEventListener('pointermove', event => {
