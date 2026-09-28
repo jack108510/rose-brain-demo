@@ -2685,7 +2685,7 @@
         const projected=RoseBrain3D.project(brainModel,graphWidth,graphHeight,graphClock),point=i=>projected[i];
         ctx.clearRect(0,0,graphWidth,graphHeight);
         RoseBrain3D.paint(ctx,brainModel,projected,graphWidth,graphHeight);
-        for(const [a,b] of webEdges){const p=point(a),q=point(b),front=(p.z+q.z)/2>0;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=front?'#ffc59b2a':'#efa16809';ctx.lineWidth=front?.55:.35;ctx.stroke()}
+        for(const [a,b] of webEdges){const p=point(a),q=point(b),front=(p.z+q.z)/2>0;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=front?'#ffc59b13':'#efa16805';ctx.lineWidth=front?.55:.35;ctx.stroke()}
         // The tracer actually walks the connected mesh from the previous tool to the next.
         const routePoints=routePath.map(point),lengths=routePoints.slice(1).map((p,i)=>Math.hypot(p.x-routePoints[i].x,p.y-routePoints[i].y)),total=lengths.reduce((a,b)=>a+b,0);
         const elapsed=Math.max(0,time-routeStartedAt),arrival=Math.min(1,elapsed/1100),distance=total*arrival;

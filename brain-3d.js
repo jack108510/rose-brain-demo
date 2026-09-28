@@ -2,7 +2,7 @@
 (() => {
   function createModel() {
     const nodes = [{ x: 0, y: 0, z: .34 }], faces = [], edges = [], keys = new Set();
-    const rings = 20, segments = 36;
+    const rings = 24, segments = 48;
     function connect(a, b) {
       const key = `${Math.min(a, b)}:${Math.max(a, b)}`;
       if (!keys.has(key)) { keys.add(key); edges.push([a, b]); }
@@ -13,14 +13,17 @@
         const latitude = .025 + (Math.PI - .05) * row / rings;
         for (let col = 0; col < segments; col++) {
           const longitude = col / segments * Math.PI * 2;
-          // Winding raised folds catch the light, with dark sulci between them.
-          const fold = Math.sin(longitude * 7 + Math.sin(latitude * 5) * 1.7);
-          const ripple = 1 + .065 * fold + .027 * Math.cos(latitude * 13 + longitude * 3);
+          // Both hemispheres meet along a medial wall, so the outline is one
+          // broad cerebrum rather than two separate ellipsoids.
+          const sin = Math.sin(latitude), cos = Math.cos(latitude);
+          const fold = Math.sin(latitude * 19 + Math.sin(longitude * 3) * 1.9);
+          const ripple = 1 + .023 * fold + .012 * Math.sin(longitude * 11 + latitude * 5);
+          const taper = 1 - .10 * (1 - cos) / 2;
           nodes.push({
-            x: side * .225 + Math.sin(latitude) * Math.cos(longitude) * .224 * ripple,
-            y: -Math.cos(latitude) * .34 * ripple,
-            z: Math.sin(latitude) * Math.sin(longitude) * .29 * ripple,
-            fold, rim: false,
+            x: side * (.012 + Math.pow(sin, .72) * (.232 + .225 * Math.cos(longitude)) * ripple * taper),
+            y: -cos * .34 * (1 + .012 * fold),
+            z: Math.pow(sin, .8) * Math.sin(longitude) * .285 * ripple,
+            fold, side, latitude, longitude, rim: false,
           });
         }
       }
@@ -59,19 +62,39 @@
     for (const { face } of sorted) {
       const [a, b, c] = face.map(i => points[i]);
       const ux = b.rx - a.rx, uy = b.ry - a.ry, uz = b.z - a.z;
-      const vx = c.rx - a.rx, vy = c.ry - a.ry, vz = c.z - a.z;
-      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-      const length = Math.hypot(nx, ny, nz) || 1;
-      nx /= length; ny /= length; nz /= length;
-      if (nz < 0) continue;
-      const light = Math.max(0, nx * -.43 + ny * -.55 + nz * .72);
-      const fold = face.reduce((sum, i) => sum + (model.nodes[i].fold || 0), 0) / 3;
-      const shade = .22 + light * .64 + Math.max(0, fold) * .12;
-      const specular = Math.pow(light, 14) * 45;
+      const vx = c.rx - a.rx, vy = c.ry - a.ry;
+      if ((ux * vy - uy * vx) * model.nodes[face[0]].side < 0) continue;
+      const latitude = face.reduce((sum, i) => sum + model.nodes[i].latitude, 0) / 3;
+      const longitude = face.reduce((sum, i) => sum + model.nodes[i].longitude, 0) / 3;
+      const fold = face.reduce((sum, i) => sum + model.nodes[i].fold, 0) / 3;
+      const side = model.nodes[face[0]].side;
+      const light = Math.max(0, side * Math.sin(latitude) * Math.cos(longitude) * -.32 + Math.cos(latitude) * .52 + Math.sin(latitude) * Math.sin(longitude) * .75);
+      const shade = .24 + light * .52 + fold * .075;
+      const specular = Math.pow(light, 12) * 12;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.closePath();
-      ctx.fillStyle = `rgb(${Math.round(75 + shade * 139 + specular)},${Math.round(29 + shade * 78 + specular)},${Math.round(17 + shade * 43 + specular)})`;
+      ctx.fillStyle = `rgb(${Math.round(89 + shade * 135 + specular)},${Math.round(36 + shade * 79 + specular)},${Math.round(24 + shade * 47 + specular)})`;
       ctx.fill(); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .55; ctx.stroke();
     }
+    // Continuous winding sulci describe the cortex over the lit surface.
+    const rings = 24, segments = 48, half = (rings + 1) * segments;
+    for (let lobe = 0; lobe < 2; lobe++) for (let row = 3; row < rings - 2; row += 2) {
+      const path = [];
+      for (let col = 1; col < segments / 2; col++) {
+        const winding = Math.round(Math.sin(col * .43 + row * .65));
+        const i = 1 + lobe * half + (row + winding) * segments + col;
+        if (points[i].z > .025) path.push(points[i]);
+      }
+      if (path.length < 3) continue;
+      ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length - 1; i++) {
+        const p = path[i], q = path[i + 1];
+        ctx.quadraticCurveTo(p.x, p.y, (p.x + q.x) / 2, (p.y + q.y) / 2);
+      }
+      ctx.strokeStyle = '#3a180fcc'; ctx.lineWidth = Math.max(1, width / 240);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+      ctx.save(); ctx.translate(0, -1.4); ctx.strokeStyle = '#ffd0a33b'; ctx.lineWidth = .8; ctx.stroke(); ctx.restore();
+    }
+
   }
   window.RoseBrain3D = { createModel, project, paint };
 })();
