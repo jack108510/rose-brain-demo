@@ -90,7 +90,7 @@
       orb.classList.toggle('speaking',phase==='speaking');orb.classList.toggle('listening',phase==='listening');
       orb.classList.toggle('live',phase==='speaking'||phase==='listening');
       status.textContent={listening:'Listening',thinking:'Thinking',speaking:'Rose is speaking',ended:'Call ended'}[phase]||'Ready when you are';
-      note.textContent=phase==='ended'?'Start another conversation anytime.':'Speak naturally. Interrupt anytime.';
+      note.textContent=phase==='ended'?'Restart the illustrated conversation anytime.':'Illustrated playback · no microphone or audio.';
       $('.wr-start-voice').style.display=phase==='ended'?'inline-block':'none';
       $('.wr-end-voice').style.display=phase==='ended'?'none':'inline-block';
     }
