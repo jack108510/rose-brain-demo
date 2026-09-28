@@ -154,6 +154,7 @@
     .wr-ai[data-simulation-paused="true"] .wr-orb:after{animation-play-state:paused}
     @media(min-width:1151px){.person{bottom:230px}.visitor-bubble{bottom:589px}}
     @media(min-width:761px) and (max-width:1150px){.person{bottom:215px}.visitor-bubble{bottom:550px}}
+    .anatomy-surface{z-index:0}#workflowGraph{z-index:1;pointer-events:auto;cursor:grab;touch-action:pan-y}#workflowGraph.dragging{cursor:grabbing}#workflowGraph:focus-visible{outline:1px solid #df9a72;outline-offset:-6px;border-radius:18px}.brain-hint{position:absolute;top:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#c59a83;pointer-events:none;white-space:nowrap;z-index:2}
   </style>
 </head>
 <body>
@@ -166,15 +167,15 @@
       <div class="bubble visitor-bubble" id="visitorSpeech">Could I get a quote for a repair?</div>
       <div class="bubble rose-bubble" id="roseSpeech">Hi! I’m Rose. How can I help?</div>
       <div class="widget-wrap" id="roseWidget"></div>
-      <div class="flow" id="flow" aria-label="Three-dimensional brain with a light path synchronized to each tool notification"><canvas class="workflow-graph" id="workflowGraph" aria-hidden="true"></canvas><div class="flow-title">Rose / workflow map</div><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div>
+      <div class="flow" id="flow" aria-label="Three-dimensional brain with a light path synchronized to each tool notification"><canvas class="workflow-graph" id="workflowGraph" aria-hidden="true"></canvas><div class="flow-title">Rose / workflow map</div><span class="brain-hint">Drag to rotate</span><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div>
       <div class="stage-foot"><span class="caption" id="caption">Customer asks a question</span><button type="button" id="next">Shuffle example ↗</button></div>
     </section>
     <nav class="scenarios" aria-label="Example conversations"><span class="scenarios-label">Explore examples</span><button type="button" data-scene="0" class="active">Quote request</button><button type="button" data-scene="1">Appointment</button><button type="button" data-scene="2">Service question</button><button type="button" data-scene="3">Job status</button></nav>
   </main>
-  <script src="brain-3d.js?v=brain-shape-2"></script>
+  <script src="brain-3d.js?v=anatomical-1"></script>
   <script src="rose-simulated-widget.js" data-mount="#roseWidget" data-inline="true" data-default-view="voice" data-title="Rose" data-accent="#ff5722" data-logo="wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations."></script>
   <script>
-    (()=>{
+    (async()=>{
       const scenarios=[
   {
     "name": "QUOTE REQUEST",
@@ -2652,6 +2653,9 @@
         return shuffleBag.pop();
       }
       const graphCanvas=document.querySelector('#workflowGraph'),graphContext=graphCanvas.getContext('2d');
+      document.querySelector('.flow-title').textContent='Loading brain…';
+      await RoseBrain3D.ready;
+      document.querySelector('.flow-title').textContent='Rose / workflow map';
       const brainModel=RoseBrain3D.createModel(),webNodes=brainModel.nodes,webEdges=brainModel.edges;
       const adjacency=webNodes.map(()=>[]);
       for(const [a,b] of webEdges){const p=webNodes[a],q=webNodes[b],distance=Math.hypot(p.x-q.x,p.y-q.y,p.z-q.z);adjacency[a].push({i:b,distance});adjacency[b].push({i:a,distance})}
@@ -2709,6 +2713,7 @@
         if(head&&arrival<1){ctx.beginPath();ctx.arc(head.x,head.y,3.5*scale,0,Math.PI*2);ctx.fillStyle='#fff7de';ctx.shadowBlur=20;ctx.shadowColor='#ff984c';ctx.fill();ctx.shadowBlur=0}
         if(!reduced)requestAnimationFrame(drawGraph);
       }
+      graphCanvas.addEventListener('rose:brain-change',()=>{if(reduced)drawGraph(performance.now())});
       sizeGraph();new ResizeObserver(()=>{sizeGraph();if(reduced)drawGraph(performance.now())}).observe(graphCanvas);if(!reduced)requestAnimationFrame(drawGraph);
 
       function showWorkflow(frame){
@@ -2755,7 +2760,7 @@
       document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListener('click',()=>{index=Number(button.dataset.scene);shuffleBag=shuffleBag.filter(i=>i!==index);resume();reset()}));
       widget.addEventListener('rose:simulation-end',()=>{simulationEnded=true;playing=false;pause.textContent='Play ▶';pause.setAttribute('aria-label','Play animation');render()});
       widget.addEventListener('rose:simulation-start',()=>{simulationEnded=false;resume();render()});
-    })();
+    })().catch(error=>{console.error('Rose demo failed to initialize',error);document.querySelector('.flow-title').textContent='Please reload the demo';});
   </script>
 </body>
 </html>

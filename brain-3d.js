@@ -1,100 +1,135 @@
-/* A sculpted, perspective-projected cortical surface. No external runtime. */
+/* MRI-derived anatomy rendered in WebGL, with a matching workflow projection. */
 (() => {
+  let THREE, metadata, binary;
+  const base = new URL('.', document.currentScript.src);
+  const ready = Promise.all([
+    import(new URL('vendor/three.module.min.js', base).href),
+    fetch(new URL('assets/anatomical-brain.json', base)).then(r => { if (!r.ok) throw Error('Brain metadata failed to load'); return r.json(); }),
+    fetch(new URL('assets/anatomical-brain.bin', base)).then(r => { if (!r.ok) throw Error('Brain geometry failed to load'); return r.arrayBuffer(); }),
+  ]).then(([library, info, bytes]) => { THREE = library; metadata = info; binary = bytes; });
+
   function createModel() {
-    const nodes = [{ x: 0, y: 0, z: .34 }], faces = [], edges = [], keys = new Set();
-    const rings = 24, segments = 48;
-    function connect(a, b) {
-      const key = `${Math.min(a, b)}:${Math.max(a, b)}`;
-      if (!keys.has(key)) { keys.add(key); edges.push([a, b]); }
+    const scene = new THREE.Scene(), group = new THREE.Group();
+    const camera = new THREE.PerspectiveCamera(32, 1, .1, 20);
+    camera.position.set(0, 0, 3.5);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+    renderer.domElement.className = 'workflow-graph anatomy-surface';
+    renderer.domElement.setAttribute('aria-hidden', 'true');
+    document.querySelector('#workflowGraph').before(renderer.domElement);
+    scene.add(group);
+    scene.add(new THREE.HemisphereLight(0xffeee4, 0x412b20, 1.6));
+    const key = new THREE.DirectionalLight(0xfff1e8, 3.2); key.position.set(-3, 4, 5); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xffb079, 1.5); rim.position.set(3, 1, -2); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0xffd4c6, .8); fill.position.set(3, -1, 4); scene.add(fill);
+    const bounds = new THREE.Box3(), geometries = [];
+    for (const item of metadata.meshes) {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(binary, item.positions.offset, item.positions.count * 3);
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions.slice(), 3));
+      geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(binary, item.normals.offset, item.normals.count * 3), 3));
+      const IndexArray = item.indices.componentType === 5123 ? Uint16Array : Uint32Array;
+      geometry.setIndex(new THREE.BufferAttribute(new IndexArray(binary, item.indices.offset, item.indices.count), 1));
+      geometry.computeBoundingBox(); bounds.union(geometry.boundingBox);
+      geometries.push({ item, geometry });
     }
-    for (const side of [-1, 1]) {
-      const start = nodes.length;
-      for (let row = 0; row <= rings; row++) {
-        const latitude = .025 + (Math.PI - .05) * row / rings;
-        for (let col = 0; col < segments; col++) {
-          const longitude = col / segments * Math.PI * 2;
-          // Both hemispheres meet along a medial wall, so the outline is one
-          // broad cerebrum rather than two separate ellipsoids.
-          const sin = Math.sin(latitude), cos = Math.cos(latitude);
-          const fold = Math.sin(latitude * 19 + Math.sin(longitude * 3) * 1.9);
-          const ripple = 1 + .023 * fold + .012 * Math.sin(longitude * 11 + latitude * 5);
-          const taper = 1 - .10 * (1 - cos) / 2;
-          nodes.push({
-            x: side * (.012 + Math.pow(sin, .72) * (.232 + .225 * Math.cos(longitude)) * ripple * taper),
-            y: -cos * .34 * (1 + .012 * fold),
-            z: Math.pow(sin, .8) * Math.sin(longitude) * .285 * ripple,
-            fold, side, latitude, longitude, rim: false,
-          });
+    const center = bounds.getCenter(new THREE.Vector3()), extent = bounds.getSize(new THREE.Vector3());
+    const normalization = 1.12 / Math.max(extent.x, extent.y, extent.z);
+    let corticalPositions, corticalNormals;
+    for (const { item, geometry } of geometries) {
+      geometry.translate(-center.x, -center.y, -center.z); geometry.scale(normalization, normalization, normalization);
+      const color = new THREE.Color(item.name === 'unified-cortex' ? '#dca697' : '#be8b7d');
+      if (item.curvature) {
+        // MRI curvature darkens the actual sulci without drawing invented grooves.
+        const curvature = new Float32Array(binary, item.curvature.offset, item.curvature.count), colors = new Float32Array(item.positions.count * 3);
+        for (let i = 0; i < item.positions.count; i++) {
+          const shade = 1 - Math.max(0, Math.min(.20, curvature[i] * .13));
+          colors[i * 3] = color.r * shade; colors[i * 3 + 1] = color.g * shade; colors[i * 3 + 2] = color.b * shade;
         }
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       }
-      for (let row = 0; row < rings; row++) for (let col = 0; col < segments; col++) {
-        const a = start + row * segments + col, b = start + row * segments + (col + 1) % segments;
-        const c = a + segments, d = b + segments;
-        faces.push([a, c, b], [b, c, d]);
-        connect(a, b); connect(a, c); connect(b, c);
-      }
-      connect(0, start + 8 * segments + 7);
+      const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: item.curvature ? '#ffffff' : color, vertexColors: !!item.curvature, roughness: .72, metalness: 0 }));
+      group.add(mesh);
+      if (item.name === 'unified-cortex') { corticalPositions = geometry.attributes.position; corticalNormals = geometry.attributes.normal; }
     }
-    // Bridges across the two hemispheres let signals cross the central cleft.
-    const half = (rings + 1) * segments;
-    for (let row = 3; row < rings - 2; row += 3) connect(1 + row * segments, 1 + half + row * segments + segments / 2);
-    return { nodes, faces, edges };
+    // Sample the real cortical surface for the illustrative workflow network.
+    const candidates = [];
+    for (let i = 0; i < corticalPositions.count; i += 11) {
+      if (corticalNormals.getZ(i) * .75 - corticalNormals.getX(i) * .6 + corticalNormals.getY(i) * .3 > .08) candidates.push(i);
+    }
+    const nodes = [];
+    for (let i = 0; i < 420; i++) {
+      const n = candidates[(i * 137) % candidates.length];
+      nodes.push({ x: corticalPositions.getX(n), y: corticalPositions.getY(n), z: corticalPositions.getZ(n) });
+    }
+    const edges = [], keys = new Set();
+    function connect(a, b) { const key = `${Math.min(a,b)}:${Math.max(a,b)}`; if (!keys.has(key)) { keys.add(key); edges.push([a,b]); } }
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i], nearest = nodes.map((q, j) => ({ j, d: Math.hypot(p.x-q.x,p.y-q.y,p.z-q.z) })).filter(n => n.j !== i).sort((a,b) => a.d-b.d);
+      for (const n of nearest.slice(0, 4)) connect(i, n.j);
+      // One connection to an earlier node guarantees every tool is reachable.
+      if (i) connect(i, nearest.find(n => n.j < i).j);
+    }
+    const model = { nodes, edges, renderer, scene, group, camera, width: 0, height: 0, vector: new THREE.Vector3(), yaw: 0, pitch: 0, dragging: false };
+    const canvas = document.querySelector('#workflowGraph');
+    let pointer = null;
+    canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0;
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Three-dimensional anatomical brain. Drag or use arrow keys to rotate. Workflow lights follow the conversation.');
+    const changed = () => canvas.dispatchEvent(new Event('rose:brain-change'));
+    canvas.addEventListener('pointerdown', event => { if (!event.isPrimary || event.button !== 0) return; pointer = { id: event.pointerId, x: event.clientX, y: event.clientY }; model.dragging = true; canvas.setPointerCapture(event.pointerId); canvas.classList.add('dragging'); });
+    canvas.addEventListener('pointermove', event => {
+      if (!pointer || pointer.id !== event.pointerId) return;
+      model.yaw += (event.clientX - pointer.x) * .008;
+      if (event.pointerType === 'mouse') model.pitch = Math.max(-.75, Math.min(.75, model.pitch + (event.clientY - pointer.y) * .006));
+      pointer.x = event.clientX; pointer.y = event.clientY; changed();
+    });
+    const release = () => { pointer = null; model.dragging = false; canvas.classList.remove('dragging'); };
+    canvas.addEventListener('pointerup', release); canvas.addEventListener('pointercancel', release); canvas.addEventListener('lostpointercapture', release);
+    canvas.addEventListener('dblclick', () => { model.yaw = 0; model.pitch = 0; changed(); });
+    canvas.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Home') { model.yaw = 0; model.pitch = 0; }
+      else if (event.key === 'ArrowLeft') model.yaw -= .15;
+      else if (event.key === 'ArrowRight') model.yaw += .15;
+      else model.pitch = Math.max(-.75, Math.min(.75, model.pitch + (event.key === 'ArrowUp' ? -.12 : .12)));
+      changed();
+    });
+    return model;
   }
 
   function project(model, width, height, clock) {
-    const yaw = -.24 + Math.sin(clock * .00018) * .23, pitch = -.26;
-    const cy = Math.cos(yaw), sy = Math.sin(yaw), cx = Math.cos(pitch), sx = Math.sin(pitch);
-    const size = Math.min(width * .92, height * .79);
+    const size = Math.min(width * .81, height * .67);
+    if (model.width !== width || model.height !== height) {
+      model.width = width; model.height = height;
+      model.renderer.setSize(width, height, false);
+      model.camera.aspect = width / height;
+      model.camera.fov = 2 * Math.atan(height / (2 * size * 3.5)) * 180 / Math.PI;
+      model.camera.updateProjectionMatrix();
+      model.camera.updateMatrixWorld();
+    }
+    model.group.rotation.set(.24 + model.pitch, -.72 + model.yaw + Math.sin(clock * .00016) * .18, -.06);
+    model.group.position.y = height * .095 / size;
+    model.group.updateMatrixWorld(true);
     return model.nodes.map(n => {
-      const x = n.x * cy + n.z * sy, z = n.z * cy - n.x * sy;
-      const y = n.y * cx - z * sx, depth = n.y * sx + z * cx;
-      const perspective = 2.5 / (2.5 - depth);
-      return { x: width * .5 + x * size * perspective, y: height * .405 + y * size * perspective, z: depth, perspective, rx: x, ry: y };
+      const v = model.vector.set(n.x, n.y, n.z).applyMatrix4(model.group.matrixWorld);
+      const depth = v.z, perspective = 3.5 / (3.5 - depth);
+      v.project(model.camera);
+      return { x: (v.x + 1) * width / 2, y: (1 - v.y) * height / 2, z: depth, perspective };
     });
   }
 
   function paint(ctx, model, points, width, height) {
-    ctx.save(); ctx.translate(width * .5, height * .73); ctx.scale(1, .15);
+    model.renderer.render(model.scene, model.camera);
+    ctx.save(); ctx.translate(width * .5, height * .735); ctx.scale(1, .14);
     const floor = ctx.createRadialGradient(0, 0, 1, 0, 0, width * .38);
-    floor.addColorStop(0, '#070302a0'); floor.addColorStop(1, '#07030200');
+    floor.addColorStop(0, '#07030290'); floor.addColorStop(1, '#07030200');
     ctx.fillStyle = floor; ctx.beginPath(); ctx.arc(0, 0, width * .38, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-    const sorted = model.faces.map(face => ({ face, z: face.reduce((sum, i) => sum + points[i].z, 0) / 3 })).sort((a, b) => a.z - b.z);
-    for (const { face } of sorted) {
-      const [a, b, c] = face.map(i => points[i]);
-      const ux = b.rx - a.rx, uy = b.ry - a.ry, uz = b.z - a.z;
-      const vx = c.rx - a.rx, vy = c.ry - a.ry;
-      if ((ux * vy - uy * vx) * model.nodes[face[0]].side < 0) continue;
-      const latitude = face.reduce((sum, i) => sum + model.nodes[i].latitude, 0) / 3;
-      const longitude = face.reduce((sum, i) => sum + model.nodes[i].longitude, 0) / 3;
-      const fold = face.reduce((sum, i) => sum + model.nodes[i].fold, 0) / 3;
-      const side = model.nodes[face[0]].side;
-      const light = Math.max(0, side * Math.sin(latitude) * Math.cos(longitude) * -.32 + Math.cos(latitude) * .52 + Math.sin(latitude) * Math.sin(longitude) * .75);
-      const shade = .24 + light * .52 + fold * .075;
-      const specular = Math.pow(light, 12) * 12;
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.closePath();
-      ctx.fillStyle = `rgb(${Math.round(89 + shade * 135 + specular)},${Math.round(36 + shade * 79 + specular)},${Math.round(24 + shade * 47 + specular)})`;
-      ctx.fill(); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = .55; ctx.stroke();
-    }
-    // Continuous winding sulci describe the cortex over the lit surface.
-    const rings = 24, segments = 48, half = (rings + 1) * segments;
-    for (let lobe = 0; lobe < 2; lobe++) for (let row = 3; row < rings - 2; row += 2) {
-      const path = [];
-      for (let col = 1; col < segments / 2; col++) {
-        const winding = Math.round(Math.sin(col * .43 + row * .65));
-        const i = 1 + lobe * half + (row + winding) * segments + col;
-        if (points[i].z > .025) path.push(points[i]);
-      }
-      if (path.length < 3) continue;
-      ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length - 1; i++) {
-        const p = path[i], q = path[i + 1];
-        ctx.quadraticCurveTo(p.x, p.y, (p.x + q.x) / 2, (p.y + q.y) / 2);
-      }
-      ctx.strokeStyle = '#3a180fcc'; ctx.lineWidth = Math.max(1, width / 240);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
-      ctx.save(); ctx.translate(0, -1.4); ctx.strokeStyle = '#ffd0a33b'; ctx.lineWidth = .8; ctx.stroke(); ctx.restore();
-    }
-
   }
-  window.RoseBrain3D = { createModel, project, paint };
+  window.RoseBrain3D = { ready, createModel, project, paint };
 })();

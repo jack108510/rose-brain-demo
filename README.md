@@ -1,6 +1,6 @@
 # Rose brain demo
 
-An illustrated Rose conversation with a rotating 3D brain workflow map. Twenty example conversations rotate through quotes, bookings, purchases, receipts, and support, with thirty tools represented in the network. The sculpted hemispheres use perspective, shaded cortical folds, and a ground shadow. Tool bulbs and notification cards follow each conversation's timeline.
+An illustrated Rose conversation with a rotating 3D brain workflow map. Twenty example conversations rotate through quotes, bookings, purchases, receipts, and support, with thirty tools represented in the network. The anatomical 3D brain uses MRI-derived cortical geometry, soft lighting, and a ground shadow. Drag or use arrow keys to rotate it; double-click or press Home to reset the view. Geometry and rendering dependencies are bundled locally; credits and provenance are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Tool bulbs and notification cards follow each conversation's timeline.
 
 **Live demo:** https://jack108510.github.io/rose-brain-demo/
 
