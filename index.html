@@ -157,6 +157,7 @@
     .anatomy-surface{z-index:0}#workflowGraph{z-index:1;pointer-events:auto;cursor:grab;touch-action:pan-y}#workflowGraph.dragging{cursor:grabbing}#workflowGraph:focus-visible{outline:1px solid #df9a72;outline-offset:-6px;border-radius:18px}.brain-hint{position:absolute;top:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#c59a83;pointer-events:none;white-space:nowrap;z-index:2}
   </style>
   <link rel="stylesheet" href="rose-appearance.css?v=rose-reference-1">
+  <link rel="stylesheet" href="demo-layout.css?v=spacing-1">
 </head>
 <body>
   <header class="site-head shell"><a class="brand" href="./"><img src="wildrose.png" alt="">Wildrose <span>/ Rose</span></a><span class="head-tag">Conversation preview</span></header>
@@ -164,16 +165,22 @@
     <div class="intro"><div><span class="eyebrow">Rose in motion</span><h1>Every question<br>moves <em>work forward.</em></h1></div><div class="intro-aside"><p>Watch Rose answer a customer, gather the right details, and move the request into your workflow.</p><small>The customer conversation and tool events are illustrated examples. Rose’s listening and reply animations follow the conversation without microphone access or audio.</small></div></div>
     <section class="stage" id="stage" data-speaker="visitor" aria-label="Rose conversation demonstration">
       <div class="scene-meta"><div><span class="scene-index" id="scenarioCount">01 / 04</span><span class="scene-name" id="sceneName">QUOTE REQUEST</span></div><div><span class="clock" id="clock">00:00</span><button type="button" id="pause" aria-label="Pause animation">Pause Ⅱ</button></div></div>
-      <div class="person" aria-label="Customer"><div class="person-art" aria-hidden="true"><svg viewBox="0 0 140 190"><ellipse class="ground" cx="70" cy="183" rx="43" ry="5"/><g><circle class="line" cx="70" cy="34" r="20"/><path class="line" d="M70 56v67"/><path class="line" d="M70 70 42 95"/><path class="line front-arm" d="M70 70 101 88"/><path class="line" d="M70 123 43 167"/><path class="line front-leg" d="M70 123 98 167"/></g></svg></div><span class="person-label">Customer</span></div>
-      <div class="bubble visitor-bubble" id="visitorSpeech">Could I get a quote for a repair?</div>
-      <div class="bubble rose-bubble" id="roseSpeech">Hi! I’m Rose. How can I help?</div>
-      <div class="widget-wrap" id="roseWidget"></div>
-      <div class="flow" id="flow" aria-label="Translucent brain shell with internal electrical signals synchronized to each tool notification"><canvas class="workflow-graph" id="workflowGraph" aria-hidden="true"></canvas><div class="flow-title">Rose / workflow map</div><span class="brain-hint">Drag to rotate</span><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div>
+      <div class="demo-layout">
+        <div class="demo-column customer-column">
+          <div class="bubble visitor-bubble" id="visitorSpeech">Could I get a quote for a repair?</div>
+          <div class="person" aria-label="Customer"><div class="person-art" aria-hidden="true"><svg viewBox="0 0 140 190"><ellipse class="ground" cx="70" cy="183" rx="43" ry="5"/><g><circle class="line" cx="70" cy="34" r="20"/><path class="line" d="M70 56v67"/><path class="line" d="M70 70 42 95"/><path class="line front-arm" d="M70 70 101 88"/><path class="line" d="M70 123 43 167"/><path class="line front-leg" d="M70 123 98 167"/></g></svg></div><span class="person-label">Customer</span></div>
+        </div>
+        <div class="demo-column rose-column">
+          <div class="bubble rose-bubble" id="roseSpeech">Hi! I’m Rose. How can I help?</div>
+          <div class="widget-wrap" id="roseWidget"></div>
+        </div>
+        <div class="flow" id="flow" aria-label="Translucent brain shell with internal electrical signals synchronized to each tool notification"><div class="brain-heading"><div class="flow-title">Rose / workflow map</div><span class="brain-hint">Drag to rotate</span></div><div class="brain-scene"><canvas class="workflow-graph" id="workflowGraph" aria-hidden="true"></canvas><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div></div>
+      </div>
       <div class="stage-foot"><span class="caption" id="caption">Customer asks a question</span><button type="button" id="next">Shuffle example ↗</button></div>
     </section>
     <nav class="scenarios" aria-label="Example conversations"><span class="scenarios-label">Explore examples</span><button type="button" data-scene="0" class="active">Quote request</button><button type="button" data-scene="1">Appointment</button><button type="button" data-scene="2">Service question</button><button type="button" data-scene="3">Job status</button></nav>
   </main>
-  <script src="brain-3d.js?v=electrical-shell-1"></script>
+  <script src="brain-3d.js?v=spacing-1"></script>
   <script src="rose-simulated-widget.js" data-mount="#roseWidget" data-inline="true" data-default-view="voice" data-title="Rose" data-accent="#ff5722" data-logo="wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations."></script>
   <script>
     (async()=>{

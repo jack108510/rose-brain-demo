@@ -131,7 +131,7 @@
       model.camera.updateMatrixWorld();
     }
     model.group.rotation.set(.24 + model.pitch, -.72 + model.yaw + Math.sin(clock * .00016) * .18, -.06);
-    model.group.position.y = height * .095 / size;
+    model.group.position.y = 0;
     model.group.updateMatrixWorld(true);
     return model.nodes.map(n => {
       const v = model.vector.set(n.x, n.y, n.z).applyMatrix4(model.group.matrixWorld);
