@@ -19,6 +19,16 @@
 .wr-site-lead { max-width: 790px; margin: 0 auto 34px; color: #ffffffad; font-size: clamp(21px,2.4vw,30px); line-height: 1.24; letter-spacing: -.026em; }
 .wr-site-cta { display: inline-block; padding: 14px 24px; color: #ffb199; background: #000; border: 1px solid #ff5722c7; border-radius: 40px; text-decoration: none; font-size: 14px; font-weight: 700; }
 .wr-site-cta:hover { background: #ff57221a; color: #fff; }
+.wr-try-form { width: min(610px, 100%); margin: 34px auto 0; text-align: left; }
+.wr-try-form label { display: block; margin: 0 0 10px 4px; color: #fff; font-size: 15px; font-weight: 700; }
+.wr-try-bar { display: flex; align-items: stretch; gap: 6px; padding: 6px; background: #191513; border: 1px solid #a9603e; border-radius: 18px; box-shadow: 0 12px 38px #0008, 0 0 34px #ff572217; }
+.wr-try-bar:focus-within { outline: 2px solid #ff9c64; outline-offset: 3px; }
+.wr-try-bar input { flex: 1; min-width: 0; padding: 13px 16px; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; font-size: 16px; }
+.wr-try-bar input::placeholder { color: #b9aaa2; }
+.wr-try-bar button { flex: none; padding: 13px 20px; border: 0; border-radius: 12px; background: #ff5722; color: #fff; font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; }
+.wr-try-bar button:hover { background: #e84d1b; }
+.wr-try-bar button:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.wr-try-form p { margin: 10px 4px 0; color: #b9aaa2; font-size: 12px; line-height: 1.5; }
 .wr-site-widget { position: relative; display: flex; align-items: center; justify-content: center; width: min(460px,94vw); min-height: 560px; margin: 54px auto 0; }
 .wr-site-widget::before { content: ''; position: absolute; inset: -22px -46px; background: radial-gradient(circle, #ff572238, transparent 58%); pointer-events: none; }
 #liveRoseVoice .wr-ai.inline { position: relative; inset: auto; margin: auto; }
@@ -31,6 +41,9 @@
   .wr-site-buy { padding: 11px 16px; }
   .wr-site-hero { padding: 70px 0 90px; }
   .wr-site-hero h1 { font-size: clamp(47px, 10.4vw, 72px); }
+  .wr-try-form { margin-top: 30px; }
+  .wr-try-bar { flex-direction: column; }
+  .wr-try-bar button { min-height: 48px; }
   .wr-site-widget { width: min(460px,100%); min-height: 540px; margin-top: 46px; }
 }
 /* Only the illustrative demo changes: conversation on the left, brain/tool activity on the right. */
