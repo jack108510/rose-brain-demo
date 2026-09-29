@@ -157,7 +157,7 @@
     .anatomy-surface{z-index:0}#workflowGraph{z-index:1;pointer-events:auto;cursor:grab;touch-action:pan-y}#workflowGraph.dragging{cursor:grabbing}#workflowGraph:focus-visible{outline:1px solid #df9a72;outline-offset:-6px;border-radius:18px}.brain-hint{position:absolute;top:29px;left:50%;transform:translateX(-50%);font-size:10px;color:#c59a83;pointer-events:none;white-space:nowrap;z-index:2}
   </style>
   <link rel="stylesheet" href="rose-appearance.css?v=calm-1">
-  <link rel="stylesheet" href="demo-layout.css?v=unified-conversation-1">
+  <link rel="stylesheet" href="demo-layout.css?v=seam-1">
 </head>
 <body>
   <nav class="wr-site-nav" aria-label="Wildrose navigation">
@@ -173,25 +173,27 @@
       <h1 id="heroTitle">Give your website<br><em>a front desk.</em></h1>
       <p class="wr-site-lead">Rose answers questions, captures quote requests, and sends the lead to you — while the visitor is still on the page.</p>
       <a class="wr-site-cta" href="https://wildroseautomations.ca/#mockup">See Rose on My Site</a>
+      <div class="wr-site-widget" id="liveRoseVoice"></div>
     </div>
-    <main class="experience wr-site-wrap" id="stage" data-speaker="visitor" aria-label="Try Rose and see how a customer conversation works">
-      <section class="experience-live" aria-label="Talk to Rose live">
-        <div class="experience-heading"><span class="experience-kicker"><i aria-hidden="true"></i>Try it yourself</span><h2>Talk to Rose</h2><p>Use voice or chat with the live assistant.</p></div>
-        <div class="wr-site-widget" id="liveRoseVoice"></div>
-      </section>
-      <section class="experience-story" aria-label="Illustrated customer conversation">
-        <div class="experience-heading"><span class="experience-kicker">Behind the conversation</span><h2>See it from the customer’s side</h2><p>A sample exchange, with Rose’s workflow in motion.</p></div>
-        <div class="flow" id="flow" aria-label="Brain visualization synchronized to the sample conversation"><div class="brain-scene"><canvas class="workflow-graph" id="workflowGraph" aria-label="Animated brain; drag or use arrow keys to rotate" tabindex="0"></canvas><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div></div>
-        <div class="conversation-panel" id="conversation" aria-label="Sample customer conversation">
-          <div class="conversation-head"><span>Sample conversation</span><span class="conversation-scenario" id="conversationScenario"></span></div>
-          <div class="conversation-messages" id="conversationMessages" aria-live="off"></div>
-        </div>
-        <p class="demo-disclaimer">Illustrated playback only — no microphone or audio here. Use the live assistant on the left to talk to Rose.</p>
-      </section>
-    </main>
   </section>
+  <main class="shell">
+    <section class="stage" id="stage" data-speaker="visitor" aria-label="Rose conversation demonstration">
+      <div class="demo-layout">
+        <div class="demo-column rose-column">
+          <div class="widget-wrap" id="roseWidget"></div>
+        </div>
+        <div class="flow" id="flow" aria-label="Translucent brain visualization synchronized to illustrated workflow events"><div class="brain-scene"><canvas class="workflow-graph" id="workflowGraph" aria-label="Animated brain; drag or use arrow keys to rotate" tabindex="0"></canvas><div class="workflow-card" id="workflowCard" aria-live="polite"></div><div class="tool-list" id="toolList"></div></div></div>
+      </div>
+      <div class="conversation-strip" id="conversation" data-speaker="visitor" aria-label="Current conversation">
+        <div class="conversation-line customer-line"><span class="conversation-speaker"><i aria-hidden="true"></i>Customer</span><p id="visitorSpeech">Could I get a quote for a repair?</p></div>
+        <div class="conversation-line rose-line"><span class="conversation-speaker"><i aria-hidden="true"></i>Rose</span><p id="roseSpeech">Listening…</p></div>
+      </div>
+    </section>
+    <p class="demo-disclaimer">The brain conversation is illustrated playback, separate from the live Rose voice test above.</p>
+  </main>
   <script src="https://wildroseautomations.ca/wildrose-widget-sandbox.js?v=mobile-launcher-contrast-1" data-api-base="https://wildrose-widget.wildeautomations.com" data-title="Rose" data-accent="#ff5722" data-logo="https://wildroseautomations.ca/logos/wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations." data-mount="#liveRoseVoice" data-inline="true" data-default-view="voice"></script>
   <script src="brain-3d.js?v=calm-1"></script>
+  <script src="rose-simulated-widget.js?v=demo-only-1" data-mount="#roseWidget" data-inline="true" data-default-view="voice" data-title="Rose" data-accent="#ff5722" data-logo="wildrose.png" data-fallback-url="mailto:jack@wildroseautomations.ca" data-greeting="Hi, I’m Rose. Ask questions about our services or tell me what you need a quote for, and I’ll help you reach the owner." data-placeholder="Ask a question or describe your request…" data-business-context="You are the visitor-facing assistant for Wildrose Automations. Help visitors with FAQs, capture quote requests and contact details, and offer owner handoff. Do not act as an owner configuration tool. Rose Basic is $24/month with 75 voice minutes; Pro is $79/month with 250 voice minutes. Extra voice minutes are $0.29/minute. Custom integrations are separately scoped. Do not promise completed bookings, payments or integrations."></script>
   <script>
     (async()=>{
       const scenarios=[
@@ -2656,12 +2658,26 @@
   ]
 ];
       scenarios.push(...extraScenarios);workflowFrames.push(...extraFrames);
-      const studio=document.querySelector('#stage'),toolList=document.querySelector('#toolList'),workflowCard=document.querySelector('#workflowCard');
-      const messages=document.querySelector('#conversationMessages'),scenarioLabel=document.querySelector('#conversationScenario');
+      const studio=document.querySelector('#stage'),visitor=document.querySelector('#visitorSpeech'),rose=document.querySelector('#roseSpeech'),toolList=document.querySelector('#toolList'),workflowCard=document.querySelector('#workflowCard'),widget=document.querySelector('#roseWidget');
       const duration=18000,playbackRate=.35,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const logos={"Rose": "wildrose.png", "Knowledge": "icons/knowledge.svg", "Calendar": "icons/googlecalendar.svg", "HubSpot": "icons/hubspot.svg", "Gmail": "icons/gmail.svg", "Twilio": "icons/twilio.svg", "Notion": "icons/notion.svg", "Airtable": "icons/airtable.svg", "Stripe": "icons/stripe.svg", "Shopify": "icons/shopify.svg", "Zendesk": "icons/zendesk.svg", "Asana": "icons/asana.svg", "Trello": "icons/trello.svg", "ClickUp": "icons/clickup.svg", "Zoom": "icons/zoom.svg", "Calendly": "icons/calendly.svg", "Sheets": "icons/googlesheets.svg", "Drive": "icons/googledrive.svg", "QuickBooks": "icons/quickbooks.svg", "Mailchimp": "icons/mailchimp.svg", "Discord": "icons/discord.svg", "Intercom": "icons/intercom.svg", "GitHub": "icons/github.svg", "Typeform": "icons/typeform.svg", "Zapier": "icons/zapier.svg", "Slack": "icons/slack.svg", "Salesforce": "icons/salesforce.svg", "Monday": "icons/mondaydotcom.svg", "Teams": "icons/microsoftteams.svg", "Outlook": "icons/microsoftoutlook.svg", "DocuSign": "icons/docusign.svg"};
-      let index=0,time=0,playing=!reduced,shownFrame=-1,renderedLines=0;
-      let shuffleBag=[];
+      // Reserve transcript space for the longest lines at the current width.
+      // New sentences should not push the rest of the page around.
+      const conversation=document.querySelector('#conversation');let measuredConversationWidth=-1;
+      function reserveConversationSpace(){
+        const width=conversation.clientWidth;if(width===measuredConversationWidth)return;measuredConversationWidth=width;
+        const probe=document.createElement('div');probe.style.cssText='position:fixed;left:-10000px;top:0;visibility:hidden;pointer-events:none;white-space:normal';document.body.append(probe);
+        for(const [who,element] of [['visitor',visitor],['rose',rose]]){
+          const style=getComputedStyle(element);probe.style.width=element.clientWidth+'px';probe.style.font=style.font;probe.style.letterSpacing=style.letterSpacing;
+          let height=innerWidth<360?88:innerWidth<=760?80:60;
+          for(const line of scenarios.flatMap(scene=>scene.lines).filter(line=>line.who===who)){probe.textContent=line.text;height=Math.max(height,probe.getBoundingClientRect().height)}
+          element.style.minHeight=Math.ceil(height)+'px';
+        }
+        probe.remove();
+      }
+      reserveConversationSpace();new ResizeObserver(reserveConversationSpace).observe(conversation);
+      let index=0,time=0,playing=!reduced,shownFrame=-1;
+      let shuffleBag=[],simulationEnded=false;
       function pickExample(){
         if(!shuffleBag.length){shuffleBag=scenarios.map((_,i)=>i).filter(i=>i!==index);for(let i=shuffleBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffleBag[i],shuffleBag[j]]=[shuffleBag[j],shuffleBag[i]]}}
         return shuffleBag.pop();
@@ -2696,7 +2712,7 @@
       function drawGraph(now){
         const delta=Math.min(Math.max(now-graphLast,0),100);graphLast=now;
         if(playing&&!document.hidden&&!reduced){graphClock+=delta;time+=delta*playbackRate;if(time>=duration)next()}
-        const timelineKey=[index,scenarios[index].lines.filter(line=>line.at<=time).length,workflowFrames[index].filter(item=>item.at<=time).length,Math.floor(time/150)].join(':');
+        const timelineKey=[index,scenarios[index].lines.filter(line=>line.at<=time).length,workflowFrames[index].filter(item=>item.at<=time).length,Math.floor(time/150),playing,simulationEnded].join(':');
         if(timelineKey!==uiKey){uiKey=timelineKey;render()}
         if(!graphWidth||!graphHeight)sizeGraph();
         const ctx=graphContext,frame=workflowFrames[index].filter(item=>item.at<=time).at(-1),active=toolNode[frame.tool]??0;
@@ -2764,29 +2780,37 @@
         for(const [selector,value] of [['.wf-tool',frame.tool],['.wf-state',frame.verb],['.wf-title',frame.title]]){const el=workflowCard.querySelector(selector);if(el.textContent!==value)el.textContent=value}
       }
       function reset(){
-        time=reduced?15000:0;shownFrame=-1;renderedLines=0;toolList.replaceChildren();messages.replaceChildren();
-        scenarioLabel.textContent=scenarios[index].name.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+        time=reduced?15000:0;shownFrame=-1;simulationEnded=false;toolList.replaceChildren();
         routeTool='';routePath=[0];routeStartedAt=0;
         for(const tool of scenarios[index].tools){const el=document.createElement('div');el.className='tool';el.dataset.name=tool.name;const copy=document.createElement('div'),name=document.createElement('strong'),status=document.createElement('span');name.textContent=tool.name;status.textContent='READY';copy.append(name,status);el.append(copy);toolList.append(el)}
         graphLast=performance.now();uiKey='';render();if(reduced)drawGraph(performance.now());
       }
       function render(){
-        const scene=scenarios[index],lines=scene.lines.filter(line=>line.at<=time),latest=lines.at(-1);
-        while(renderedLines<lines.length){
-          const line=lines[renderedLines++],row=document.createElement('div'),label=document.createElement('span'),bubble=document.createElement('p');
-          row.className='message '+(line.who==='visitor'?'customer-message':'rose-message');
-          label.className='message-speaker';label.textContent=line.who==='visitor'?'Customer':'Rose';
-          bubble.textContent=line.text;row.append(label,bubble);messages.append(row);
-          messages.scrollTop=messages.scrollHeight;
-        }
+        const scene=scenarios[index],lines=scene.lines.filter(line=>line.at<=time),latest=lines.at(-1),latestVisitor=lines.filter(line=>line.who==='visitor').at(-1),latestRose=lines.filter(line=>line.who==='rose').at(-1);
+        const visitorText=latestVisitor?.text||scene.lines.find(line=>line.who==='visitor').text,roseText=latestRose?.text||'Listening…';
+        if(visitor.textContent!==visitorText)visitor.textContent=visitorText;
+        if(rose.textContent!==roseText)rose.textContent=roseText;
+        rose.classList.toggle('pending',!latestRose);
         const frames=workflowFrames[index],frameIndex=frames.findLastIndex(frame=>frame.at<=time),frame=frames[Math.max(frameIndex,0)];
         if(frameIndex!==shownFrame){shownFrame=frameIndex;showWorkflow(frame)}
         const workflowCurrent=frame.at>(latest?.at??-1);
         studio.dataset.speaker=workflowCurrent?'tool':latest?.who||'visitor';
+        studio.classList.toggle('speaker-person',latest?.who==='visitor'&&time-latest.at<1500);
+        const lineAge=time-(latest?.at||0);
+        const nextReply=scene.lines.find(line=>line.who==='rose'&&line.at>time);
+        const spokenDuration=Math.min(3100,Math.max(1500,(latest?.text.split(/\s+/).length||0)*230));
+        const phase=simulationEnded?'ended':latest?.who==='rose'&&lineAge<spokenDuration?'speaking':latest?.who==='visitor'&&nextReply&&nextReply.at-time<650?'thinking':'listening';
+        const dialogueSpeaker=phase==='speaking'?'rose':latest?.who==='visitor'&&lineAge<spokenDuration?'visitor':'none';
+        document.querySelector('#conversation').dataset.speaker=dialogueSpeaker;
+        studio.dataset.dialogueSpeaker=dialogueSpeaker;
+        window.__roseSimulation.update({phase,lines,paused:!playing||reduced});
+
         for(const tool of scene.tools){const el=[...toolList.children].find(item=>item.dataset.name===tool.name);const done=time>=tool.at,working=!done&&frame.tool===tool.name&&frame.state==='working';el.classList.toggle('active',done);el.classList.toggle('working',working);el.querySelector('span').textContent=done?tool.status:working?frame.verb:'READY'}
       }
       function next(){index=pickExample();playing=!reduced;reset()}
       reset();
+      widget.addEventListener('rose:simulation-end',()=>{simulationEnded=true;playing=false;render()});
+      widget.addEventListener('rose:simulation-start',()=>{simulationEnded=false;playing=!reduced;render()});
     })().catch(error=>{console.error('Rose demo failed to initialize',error);document.querySelector('#flow').setAttribute('aria-label','Brain demo failed to load; reload the page');});
   </script>
 </body>

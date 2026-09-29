@@ -1,64 +1,155 @@
-/* One experience: a live Rose on the left and a clearly labelled sample on the right. */
-:root { background:#050505; color:#fff; }
-body { background:#050505; }
-.wr-site-wrap { width:min(1180px,calc(100% - 48px)); max-width:none; margin-inline:auto; }
-.wr-site-nav { background:#050505; border-bottom:1px solid #ffffff19; padding:16px 0; }
-.wr-site-nav .wr-site-wrap { display:flex; justify-content:space-between; align-items:center; gap:20px; }
-.wr-site-nav a { color:#fff; text-decoration:none; font-size:14px; font-weight:650; }
-.wr-site-brand { display:flex; align-items:center; gap:10px; font-size:18px!important; font-weight:800!important; }
-.wr-site-brand img { width:36px; height:36px; object-fit:contain; }
-.wr-site-links { display:flex; gap:36px; }.wr-site-links a { color:#c7c7c7; }
-.wr-site-buy { padding:14px 25px; border-radius:40px; background:#ff5722; }
-.wr-site-hero { position:relative; overflow:hidden; padding:72px 0 96px; color:#fff; background:#050505; border-bottom:0; }
-.wr-site-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 17%,#ff57221e,transparent 32%); pointer-events:none; }
-.wr-site-hero-inner { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; }
-.wr-site-label { display:inline-flex; align-items:center; gap:9px; margin-bottom:20px; padding:8px 14px; border:1px solid #ffffff24; border-radius:99px; background:#ffffff12; color:#ffffffbf; font-size:12px; font-weight:650; }
-.wr-site-label span,.experience-kicker i { width:7px; height:7px; border-radius:50%; background:#ff5722; box-shadow:0 0 13px #ff572288; }
-.wr-site-hero h1 { max-width:1060px; margin:0 auto 22px; font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:clamp(52px,9vw,108px); line-height:.97; letter-spacing:-.075em; font-weight:650; }
-.wr-site-hero h1 em { display:block; color:#ffffffa8; font-style:normal; font-weight:500; }
-.wr-site-lead { max-width:740px; margin:0 auto 26px; color:#ffffffaf; font-size:clamp(18px,2.2vw,26px); line-height:1.3; letter-spacing:-.02em; }
-.wr-site-cta { display:inline-block; padding:12px 22px; border:1px solid #ff5722bd; border-radius:50px; color:#ffb199; background:#080808; text-decoration:none; font-size:14px; font-weight:700; }.wr-site-cta:hover { color:#fff; background:#ff572222; }
-.experience { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr); gap:clamp(32px,5vw,78px); padding:64px 0 0; align-items:start; }
-.experience-live,.experience-story { min-width:0; }
-.experience-heading { min-height:109px; text-align:left; }
-.experience-kicker { display:inline-flex; align-items:center; gap:9px; color:#ff9a66; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
-.experience-heading h2 { margin:10px 0 5px; color:#fff; font-size:clamp(23px,2.7vw,33px); font-weight:650; letter-spacing:-.045em; line-height:1.15; }
-.experience-heading p { margin:0; color:#ffffff91; font-size:14px; line-height:1.45; }
-.wr-site-widget { position:relative; display:flex; align-items:flex-start; justify-content:center; width:100%; min-height:560px; margin:0; }
-.wr-site-widget::before { content:''; position:absolute; inset:-28px; background:radial-gradient(circle,#ff572220,transparent 62%); pointer-events:none; }
-#liveRoseVoice .wr-ai.inline { position:relative; inset:auto; margin:0 auto; }
-#liveRoseVoice .wr-ai.inline .wr-panel { position:relative; right:auto; bottom:auto; }
-#liveRoseVoice .wr-fab,#liveRoseVoice .wr-close { display:none!important; }
-#liveRoseVoice main { padding:0; }
-.flow { position:relative; inset:auto; display:block; width:100%; height:310px; margin:0 0 16px; isolation:isolate; }
-.flow::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 55%,#ff70231c,transparent 67%); pointer-events:none; }
-.brain-scene { position:relative; width:100%; height:100%; }
-.anatomy-surface { z-index:0; }#workflowGraph { z-index:1; pointer-events:auto; cursor:grab; touch-action:pan-y; }#workflowGraph.dragging { cursor:grabbing; }
-#workflowGraph:focus-visible { outline:1px solid #df9a72; outline-offset:-6px; border-radius:12px; }
-.workflow-graph { position:absolute; inset:0; width:100%; height:100%; display:block; }
-.workflow-card { position:absolute; z-index:3; top:auto; bottom:2px; left:50%; width:min(310px,83%); min-height:80px; padding:10px 13px; transform:translateX(-50%); border:1px solid #ffad733d; border-radius:14px; background:#251610ed; box-shadow:0 12px 35px #000a; animation:none; backdrop-filter:none; }
-.workflow-card .wf-head { gap:8px; }.workflow-card .wf-mark { width:31px; height:31px; border:0; background:transparent; }.workflow-card .wf-mark img { width:29px; height:29px; object-fit:contain; }.workflow-card .wf-tool { font-size:10px; letter-spacing:0; text-transform:none; }.workflow-card .wf-state { font-size:8px; }.workflow-card .wf-title { margin:6px 0 0; font-size:13px; }
-.tool-list { display:none; }
-.conversation-panel { height:280px; display:flex; flex-direction:column; overflow:hidden; border:1px solid #ffffff27; border-radius:18px; background:linear-gradient(155deg,#17110e,#100d0b); }
-.conversation-head { display:flex; justify-content:space-between; gap:12px; align-items:center; flex:none; min-height:46px; padding:0 18px; border-bottom:1px solid #ffffff16; color:#f6d9c6; font-size:11px; font-weight:780; letter-spacing:.07em; text-transform:uppercase; }
-.conversation-scenario { color:#ff9f69; font-size:10px; text-align:right; }
-.conversation-messages { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding:17px 18px 22px; scrollbar-width:thin; scrollbar-color:#80523b transparent; }
-.message { display:flex; flex-direction:column; align-items:flex-start; max-width:87%; gap:5px; }
-.message.customer-message { align-self:flex-end; align-items:flex-end; }.message.rose-message { align-self:flex-start; }
-.message-speaker { color:#b7a69a; font-size:10px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
-.rose-message .message-speaker { color:#ffae82; }
-.message p { margin:0; padding:10px 14px; border:1px solid #ffffff19; border-radius:14px 14px 14px 4px; background:#302017; color:#f8e6d9; font-size:14px; line-height:1.42; }
-.customer-message p { border-color:#a959323e; border-radius:14px 14px 4px 14px; background:#713820; color:#fff1e8; }
-.demo-disclaimer { margin:12px 0 0; color:#a68d7d; font-size:11px; line-height:1.45; text-align:left; }
-@media(max-width:800px) {
-  .wr-site-links { display:none; }.wr-site-buy { padding:11px 16px; }.wr-site-nav .wr-site-wrap { gap:12px; }
-  .wr-site-hero { padding:58px 0 64px; }.wr-site-hero h1 { font-size:clamp(47px,10vw,76px); }
-  .experience { grid-template-columns:1fr; gap:54px; width:min(510px,calc(100% - 36px)); padding-top:55px; }
-  .experience-heading { min-height:auto; margin-bottom:18px; }.experience-heading h2 { font-size:27px; }
-  .wr-site-widget { min-height:560px; }.flow { height:310px; }
+/* Keep the approved hero and demo layout; give their outer sections one continuous black canvas. */
+:root, body { background: #000; }
+.shell { background: #000; }
+
+.wr-site-wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.wr-site-nav { background: #000; border-bottom: 1px solid #ffffff1a; padding: 16px 0; }
+.wr-site-nav .wr-site-wrap { display: flex; justify-content: space-between; align-items: center; }
+.wr-site-nav a { text-decoration: none; color: #fff; font-size: 14px; font-weight: 650; }
+.wr-site-brand { display: flex; align-items: center; gap: 10px; font-size: 18px !important; font-weight: 800 !important; letter-spacing: -.3px; }
+.wr-site-brand img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; }
+.wr-site-links { display: flex; gap: 36px; }
+.wr-site-links a { color: #c7c7c7; }
+.wr-site-buy { background: #ff5722; padding: 14px 25px; border-radius: 40px; }
+.wr-site-hero { color: #fff; background: #000; position: relative; overflow: hidden; padding: 74px 0 118px; border-bottom: 0; }
+.wr-site-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 36%, #ff57223d, transparent 27%), linear-gradient(#050505, #000 46%, #000); pointer-events: none; }
+.wr-site-hero-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.wr-site-label { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 18px; padding: 8px 14px; border-radius: 980px; background: #ffffff14; border: 1px solid #ffffff24; color: #ffffffb8; font-size: 13px; font-weight: 600; }
+.wr-site-label span { width: 8px; height: 8px; border-radius: 50%; background: #ff5722; box-shadow: 0 0 18px #ff5722d9; }
+.wr-site-hero h1 { max-width: 1060px; margin: 0 auto 26px; font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size: clamp(56px,10vw,118px); line-height: .94; letter-spacing: -.075em; font-weight: 650; }
+.wr-site-hero h1 em { display: block; font-family: inherit; font-style: normal; color: #ffffff9e; font-weight: 500; }
+.wr-site-lead { max-width: 790px; margin: 0 auto 34px; color: #ffffffad; font-size: clamp(21px,2.4vw,30px); line-height: 1.24; letter-spacing: -.026em; }
+.wr-site-cta { display: inline-block; padding: 14px 24px; color: #ffb199; background: #000; border: 1px solid #ff5722c7; border-radius: 40px; text-decoration: none; font-size: 14px; font-weight: 700; }
+.wr-site-cta:hover { background: #ff57221a; color: #fff; }
+.wr-site-widget { position: relative; display: flex; align-items: center; justify-content: center; width: min(460px,94vw); min-height: 560px; margin: 54px auto 0; }
+.wr-site-widget::before { content: ''; position: absolute; inset: -22px -46px; background: radial-gradient(circle, #ff572238, transparent 58%); pointer-events: none; }
+#liveRoseVoice .wr-ai.inline { position: relative; inset: auto; margin: auto; }
+#liveRoseVoice .wr-ai.inline .wr-panel { position: relative; right: auto; bottom: auto; }
+#liveRoseVoice .wr-fab, #liveRoseVoice .wr-close { display: none !important; }
+@media (max-width: 760px) {
+  .wr-site-nav .wr-site-wrap { gap: 12px; }
+  .wr-site-links { display: none; }
+  .wr-site-buy { padding: 11px 16px; }
+  .wr-site-hero { padding: 70px 0 90px; }
+  .wr-site-hero h1 { font-size: clamp(47px, 10.4vw, 72px); }
+  .wr-site-widget { width: min(460px,100%); min-height: 540px; margin-top: 46px; }
 }
-@media(max-width:390px) {
-  .wr-site-wrap { width:calc(100% - 28px); }.wr-site-brand { font-size:16px!important; }.wr-site-brand img { width:30px; height:30px; }
-  .wr-site-hero h1 { font-size:clamp(43px,11.5vw,54px); }.experience { width:calc(100% - 28px); }.conversation-head { padding-inline:12px; }.conversation-messages { padding-inline:12px; }.message { max-width:94%; }
+/* The widget's own main regions must not inherit the demo shell padding. */
+#liveRoseVoice main, #roseWidget main { padding: 0; }
+/* Three clear visuals above one shared conversation strip. */
+.intro { gap: clamp(32px, 5vw, 72px); margin-bottom: 40px; }
+.stage { height: auto; padding: 24px clamp(20px, 2.6vw, 36px); }
+.scene-meta { position: relative; inset: auto; gap: 16px; min-height: 34px; }
+.demo-layout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: 560px; gap: clamp(24px, 3vw, 44px); margin: 28px 0; }
+.demo-column { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.person { position: relative; inset: auto; width: 100%; height: 100%; justify-content: center; gap: 16px; }
+.person-art { width: 210px; height: 310px; max-width: 80%; }
+.person-label { margin: 0; font-size: 11px; transition: color .2s; }
+.stage[data-dialogue-speaker="visitor"] .person-label { color: #ff9a69; }
+.widget-wrap { position: relative; inset: auto; transform: none; width: 100%; max-width: 382px; }
+.flow { position: relative; inset: auto; display: block; width: 100%; height: 560px; margin: 0; }
+.flow:before { inset: 40px -8px 100px; }
+.brain-heading { position: absolute; top: 8px; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.flow-title, .brain-hint { position: static; inset: auto; transform: none; margin: 0; }
+.flow-title { font-size: 9px; letter-spacing: .18em; }
+.brain-scene { position: relative; height: 100%; min-width: 0; }
+.workflow-card { inset: auto 5% 16px; width: 90%; min-height: 90px; }
+.conversation-strip { border: 1px solid #d8946228; border-radius: 16px; background: #ffffff03; overflow: hidden; }
+.conversation-line { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: baseline; gap: 20px; padding: 20px 24px; transition: background .25s; }
+.conversation-line + .conversation-line { border-top: 1px solid #ffffff0a; }
+.conversation-speaker { display: flex; align-items: center; gap: 10px; color: #b6937f; font-size: 10px; font-weight: 750; letter-spacing: .10em; text-transform: uppercase; transition: color .25s; }
+.conversation-speaker i { width: 5px; height: 5px; border-radius: 50%; background: #73503b; flex: none; }
+.conversation-line p { margin: 0; min-width: 0; color: #ead9cd; font-size: clamp(16px, 1.4vw, 20px); line-height: 1.5; font-weight: 500; }
+.conversation-line p.pending { color: #947e70; font-weight: 400; }
+.conversation-strip[data-speaker="visitor"] .customer-line,
+.conversation-strip[data-speaker="rose"] .rose-line { background: #ff9c6810; }
+.conversation-strip[data-speaker="visitor"] .customer-line .conversation-speaker,
+.conversation-strip[data-speaker="rose"] .rose-line .conversation-speaker { color: #ffb184; }
+.conversation-strip[data-speaker="visitor"] .customer-line .conversation-speaker i,
+.conversation-strip[data-speaker="rose"] .rose-line .conversation-speaker i { background: #ffa167; box-shadow: 0 0 10px #ff8b4280; }
+.demo-disclaimer { margin: 14px 0 0; text-align: center; color: #9e8374; font-size: 11px; line-height: 1.5; }
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .stage { padding-inline: 24px; }
+  .demo-layout { column-gap: 24px; }
+  .person-art { width: 180px; height: 280px; }
+  .workflow-card .wf-head { gap: 7px; }
 }
-@media(prefers-reduced-motion:reduce) { .workflow-card { animation:none; } }
+
+@media (min-width: 761px) and (max-width: 1023px) {
+  .demo-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 560px 510px; gap: 32px; }
+  .flow { grid-column: 1 / -1; height: 510px; width: min(480px, 100%); justify-self: center; }
+  .workflow-card { inset-inline: 8%; width: 84%; bottom: 16px; }
+  .intro { grid-template-columns: 1fr; gap: 24px; }
+  .intro-aside { display: flex; gap: 32px; align-items: start; }
+  .intro-aside p, .intro-aside small { flex: 1; margin: 0; }
+  h1 { font-size: clamp(62px, 8vw, 80px); }
+}
+
+@media (max-width: 760px) {
+  main { padding-block: 36px 44px; }
+  .intro { margin-bottom: 28px; }
+  .intro-aside { margin-top: 22px; }
+  .stage { padding: 18px 18px 20px; }
+  .scene-meta { min-height: 28px; gap: 8px; }
+  .scene-meta > div { gap: 7px; }
+  .scene-name { font-size: 8px; letter-spacing: .09em; }
+  .scene-index { font-size: 9px; }
+  .demo-layout { display: flex; flex-direction: column; gap: 32px; margin: 28px 0; }
+  .demo-column { width: 100%; }
+  .customer-column .person { flex-direction: row; width: auto; height: auto; gap: 16px; }
+  .person-art { width: 62px; height: 100px; max-width: 100%; }
+  .person-label { font-size: 9px; letter-spacing: .12em; }
+  .widget-wrap { max-width: 382px; }
+  .flow { height: clamp(430px, 122vw, 530px); width: 100%; }
+  .brain-heading { top: 0; gap: 10px; }
+  .workflow-card { inset-inline: 2%; width: 96%; bottom: 8px; }
+  .conversation-line { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 16px; }
+  .conversation-speaker { font-size: 8px; gap: 7px; letter-spacing: .06em; }
+  .conversation-line p { font-size: 15px; }
+}
+
+@media (max-width: 359px) {
+  .shell { width: calc(100% - 20px); }
+  .stage { padding-inline: 14px; }
+  .scene-name { font-size: 7px; }
+  .scene-meta button { padding: 6px; font-size: 9px; }
+  .clock { display: none; }
+  .conversation-line { grid-template-columns: 1fr; gap: 8px; padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .conversation-line, .conversation-speaker, .person-label { transition: none; } }
+
+/* Let the electrical route carry the movement, with steady surrounding UI. */
+.person-art, .person-art .front-arm, .person-art .front-leg { animation: none; }
+.workflow-card { animation: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.workflow-card.working .wf-state:before { animation: none; }
+.conversation-line { min-height: 100px; align-items: center; }
+.conversation-line p { min-height: 60px; display: flex; align-items: center; }
+@media(max-width:760px) {
+  .conversation-line { min-height: 112px; }
+  .conversation-line p { min-height: 80px; }
+}
+@media(max-width:359px) {
+  .conversation-line { grid-template-rows: 12px minmax(88px,auto); }
+  .conversation-line p { min-height: 88px; }
+}
+
+/* Rose and her brain are the two anchors; the transcript supplies the customer. */
+.demo-layout { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(16px, 3vw, 48px); }
+.rose-column { align-items: center; }
+.flow { grid-column: auto; width: 100%; }
+.widget-wrap { max-width: 382px; }
+@media (min-width:761px) and (max-width:1023px) {
+  .demo-layout { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); grid-template-rows: 560px; }
+  .flow { grid-column: auto; width: 100%; height: 560px; }
+}
+@media (max-width:760px) {
+  .demo-layout { gap: 8px; }
+  .rose-column { min-height: 490px; }
+  .flow { height: clamp(430px, 122vw, 530px); }
+}
+main { padding-top: clamp(24px, 4vw, 60px); }
+.stage { max-width: 1200px; margin-inline: auto; }
+.demo-layout { margin-top: 0; }
+@media (max-width:760px) { main { padding-top: 20px; } }
