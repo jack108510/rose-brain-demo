@@ -2,6 +2,7 @@
 .rose-reveal{position:relative;overflow:hidden;isolation:isolate;margin:104px auto 50px;padding:68px 20px 26px;border:1px solid #503528;border-radius:22px;background:radial-gradient(ellipse at 50% 91%,#3b2319 0%,#181314 40%,#0b0b0e 81%);text-align:center;color:#fff2e9}
 .rose-reveal__eyebrow{margin:0;color:#e9ae88;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
 .rose-reveal h2{position:relative;z-index:2;margin:12px 0 3px;font-size:clamp(32px,4vw,56px);font-weight:620;letter-spacing:-.065em;line-height:1.1}
+.rose-reveal .wr-try-form{position:relative;z-index:3;margin:28px auto 18px;scroll-margin-top:130px}
 .rose-reveal__stage{position:relative;height:442px;max-width:1050px;margin:auto;perspective:1300px}
 .rose-reveal__arch{position:absolute;inset:9px 7% 29px;width:86%;height:calc(100% - 38px);overflow:visible;filter:drop-shadow(0 0 9px #ffac73a8) drop-shadow(0 0 30px #df744c66);pointer-events:none}
 .rose-reveal__arch path{fill:none;stroke:#ffd0a4;stroke-width:1.3;stroke-dasharray:1300;stroke-dashoffset:1300;opacity:0;transition:stroke-dashoffset 1.5s ease .3s,opacity .8s ease .3s}
