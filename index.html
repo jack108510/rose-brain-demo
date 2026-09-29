@@ -2656,7 +2656,7 @@
 ];
       scenarios.push(...extraScenarios);workflowFrames.push(...extraFrames);
       const studio=document.querySelector('#stage'),conversation=document.querySelector('#conversation'),terminalStatus=document.querySelector('#terminalStatus'),toolList=document.querySelector('#toolList'),workflowCard=document.querySelector('#workflowCard');
-      const duration=18000,playbackRate=.35,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration=18000,playbackRate=.72,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
       const logos={"Rose": "wildrose.png", "Knowledge": "icons/knowledge.svg", "Calendar": "icons/googlecalendar.svg", "HubSpot": "icons/hubspot.svg", "Gmail": "icons/gmail.svg", "Twilio": "icons/twilio.svg", "Notion": "icons/notion.svg", "Airtable": "icons/airtable.svg", "Stripe": "icons/stripe.svg", "Shopify": "icons/shopify.svg", "Zendesk": "icons/zendesk.svg", "Asana": "icons/asana.svg", "Trello": "icons/trello.svg", "ClickUp": "icons/clickup.svg", "Zoom": "icons/zoom.svg", "Calendly": "icons/calendly.svg", "Sheets": "icons/googlesheets.svg", "Drive": "icons/googledrive.svg", "QuickBooks": "icons/quickbooks.svg", "Mailchimp": "icons/mailchimp.svg", "Discord": "icons/discord.svg", "Intercom": "icons/intercom.svg", "GitHub": "icons/github.svg", "Typeform": "icons/typeform.svg", "Zapier": "icons/zapier.svg", "Slack": "icons/slack.svg", "Salesforce": "icons/salesforce.svg", "Monday": "icons/mondaydotcom.svg", "Teams": "icons/microsoftteams.svg", "Outlook": "icons/microsoftoutlook.svg", "DocuSign": "icons/docusign.svg"};
       let index=0,time=0,playing=!reduced,shownFrame=-1,shownTranscript='';
       let shuffleBag=[];
@@ -2691,6 +2691,27 @@
       let graphWidth=0,graphHeight=0,graphClock=0,graphLast=performance.now(),uiKey='',baseRevision=-1;
       const baseCanvas=document.createElement('canvas'),baseContext=baseCanvas.getContext('2d');
       function sizeGraph(){const rect=graphCanvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);graphWidth=rect.width;graphHeight=rect.height;graphCanvas.width=Math.round(graphWidth*ratio);graphCanvas.height=Math.round(graphHeight*ratio);graphContext.setTransform(ratio,0,0,ratio,0,0);baseRevision=-1}
+      // Jagged, flickering discharges, drawn in the projected brain network.
+      // Stable per 55ms tick so the bolts crackle without random frame noise.
+      function bolt(ctx,p,q,seed,alpha,scale){
+        if(!p||!q||alpha<=0)return;
+        const dx=q.x-p.x,dy=q.y-p.y,length=Math.hypot(dx,dy);
+        if(length<2)return;
+        const tick=Math.floor(graphClock/55),jitter=Math.min(8*scale,length*.17);
+        const points=[p];
+        for(let k=1;k<6;k++){
+          const t=k/6,noise=Math.sin((seed*31+k*97+tick*37)*12.9898)*43758.5453;
+          const offset=((noise-Math.floor(noise))*2-1)*jitter*Math.sin(Math.PI*t);
+          points.push({x:p.x+dx*t-dy/length*offset,y:p.y+dy*t+dx/length*offset});
+        }
+        points.push(q);
+        ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
+        for(let k=1;k<points.length;k++)ctx.lineTo(points[k].x,points[k].y);
+        ctx.lineJoin='round';ctx.lineCap='round';
+        ctx.strokeStyle=`rgba(255,104,30,${alpha*.65})`;ctx.lineWidth=7*scale;ctx.shadowBlur=18*scale;ctx.shadowColor='#ff6a27';ctx.stroke();
+        ctx.shadowBlur=0;ctx.strokeStyle=`rgba(255,182,84,${alpha})`;ctx.lineWidth=2.7*scale;ctx.stroke();
+        ctx.strokeStyle=`rgba(255,249,223,${Math.min(1,alpha*1.25)})`;ctx.lineWidth=1.05*scale;ctx.stroke();
+      }
       function drawGraph(now){
         const delta=Math.min(Math.max(now-graphLast,0),100);graphLast=now;
         if(playing&&!document.hidden&&!reduced){graphClock+=delta;time+=delta*playbackRate;if(time>=duration)next()}
@@ -2718,26 +2739,48 @@
         ctx.drawImage(baseCanvas,0,0,graphWidth,graphHeight);
         // The tracer actually walks the connected mesh from the previous tool to the next.
         const routePoints=routePath.map(point),lengths=routePoints.slice(1).map((p,i)=>Math.hypot(p.x-routePoints[i].x,p.y-routePoints[i].y)),total=lengths.reduce((a,b)=>a+b,0);
-        const elapsed=Math.max(0,time-routeStartedAt),arrival=Math.min(1,elapsed/1100),distance=total*arrival;
+        const elapsed=Math.max(0,time-routeStartedAt),arrival=Math.min(1,elapsed/700),distance=total*arrival;
         let covered=0,head=routePoints[0];
         for(let n=0;n<lengths.length;n++){
           const p=routePoints[n],q=routePoints[n+1],length=lengths[n],portion=Math.max(0,Math.min(1,(distance-covered)/length));
-          // A warm afterglow shows the exact completed route beneath the travelling tip.
-          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='#ffb27555';ctx.lineWidth=1.2;ctx.stroke();
-          if(portion>0){const tip={x:p.x+(q.x-p.x)*portion,y:p.y+(q.y-p.y)*portion};ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(tip.x,tip.y);ctx.strokeStyle=frame.state==='working'?'#ffd9a5':'#ffd9a5bb';ctx.lineWidth=2.1;ctx.shadowBlur=18;ctx.shadowColor='#ff8f45';ctx.stroke();ctx.shadowBlur=0;head=tip}
+          // The visited route glows faintly; a much hotter jagged front moves along it.
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='#ffb27535';ctx.lineWidth=1.1;ctx.stroke();
+          if(portion>0){
+            const tip={x:p.x+(q.x-p.x)*portion,y:p.y+(q.y-p.y)*portion};
+            const front=Math.max(0,Math.min(1,(distance-covered+length*.3)/Math.max(length,1)));
+            if(front>0)bolt(ctx,{x:p.x+(tip.x-p.x)*Math.max(0,1-.55/front),y:p.y+(tip.y-p.y)*Math.max(0,1-.55/front)},tip,n+31,.7,scale);
+            head=tip;
+          }
           covered+=length;
         }
-        // Small impulses continue along the selected route while its tool works.
-        if(arrival===1&&total>0){for(let impulse=0;impulse<3;impulse++){const d=((elapsed-1100)*.0003+impulse/3)%1*total;let segmentStart=0;for(let n=0;n<lengths.length;n++){if(d<=segmentStart+lengths[n]){const t=(d-segmentStart)/lengths[n],p=routePoints[n],q=routePoints[n+1];ctx.beginPath();ctx.arc(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,2*scale,0,Math.PI*2);ctx.fillStyle='#fff0ce';ctx.shadowBlur=10;ctx.shadowColor='#ffa15d';ctx.fill();ctx.shadowBlur=0;break}segmentStart+=lengths[n]}}}
-        // Small background discharges travel through the interior; the selected
-        // workflow route stays brightest and follows the current tool event.
-        for(let lane=0;lane<3;lane++){
-          const phase=graphClock/3600+lane*.33,cycle=Math.floor(phase),t=phase-cycle;
-          const [a,b]=webEdges[(cycle*31+lane*137)%webEdges.length],p=point(a),q=point(b);
-          const tail=Math.max(0,t-.22),alpha=Math.sin(t*Math.PI)*.65;
-          ctx.beginPath();ctx.moveTo(p.x+(q.x-p.x)*tail,p.y+(q.y-p.y)*tail);ctx.lineTo(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t);
-          ctx.strokeStyle=`rgba(255,201,126,${alpha})`;ctx.lineWidth=1.4*scale;ctx.shadowColor='#ff883d';ctx.shadowBlur=12;ctx.stroke();
-          ctx.beginPath();ctx.arc(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t,1.7*scale,0,Math.PI*2);ctx.fillStyle=`rgba(255,238,197,${alpha})`;ctx.fill();ctx.shadowBlur=0;
+        // Repeated impulses race down the selected route, including when a tool is working.
+        if(total>0){for(let impulse=0;impulse<3;impulse++){
+          const d=((graphClock*.0009+impulse/3)%1)*total;
+          let segmentStart=0;
+          for(let n=0;n<lengths.length;n++){
+            const length=lengths[n];
+            if(d<=segmentStart+length){
+              const p=routePoints[n],q=routePoints[n+1],start=Math.max(0,(d-segmentStart-length*.65)/length),end=Math.min(1,(d-segmentStart)/length);
+              bolt(ctx,{x:p.x+(q.x-p.x)*start,y:p.y+(q.y-p.y)*start},{x:p.x+(q.x-p.x)*end,y:p.y+(q.y-p.y)*end},n+impulse*23,.95,scale);
+              const branch=adjacency[routePath[n]][(n+impulse)%adjacency[routePath[n]].length];
+              if(branch&&branch.i!==routePath[n+1])bolt(ctx,p,point(branch.i),n+impulse*17,.42,scale);
+              break;
+            }
+            segmentStart+=length;
+          }
+        }}
+        // Independent branching discharges keep the whole interior alive.
+        for(let lane=0;lane<6;lane++){
+          const phase=graphClock/950+lane*.29,cycle=Math.floor(phase),t=phase-cycle;
+          const [a,b]=webEdges[((cycle*47+lane*137)%webEdges.length+webEdges.length)%webEdges.length];
+          const branch=adjacency[b][(cycle+lane+adjacency[b].length)%adjacency[b].length];
+          const next=branch&&adjacency[branch.i][(cycle+lane+2)%adjacency[branch.i].length];
+          const alpha=Math.sin(t*Math.PI)*.84;
+          bolt(ctx,point(a),point(b),lane*37+cycle,alpha,scale);
+          if(branch){
+            bolt(ctx,point(b),point(branch.i),lane*43+cycle,alpha*.78,scale);
+            if(next&&next.i!==b)bolt(ctx,point(branch.i),point(next.i),lane*53+cycle,alpha*.58,scale);
+          }
         }
         const routeSet=new Set(routePath);
         for(let i=0;i<webNodes.length;i++){
