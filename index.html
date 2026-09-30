@@ -2885,6 +2885,10 @@
       });
       window.addEventListener('message',event=>{
         if(event.origin!=='https://wildroseautomations.ca'||event.source!==frame.contentWindow||!event.data||typeof event.data!=='object')return;
+        if(event.data.type==='roseBuyView'){
+          title.textContent=event.data.active===true?'Choose your Rose plan':`Rose preview for ${frame.title.replace('Rose website preview for ','')}`;
+          shell.scrollIntoView({behavior:'smooth',block:'start'});
+        }
         if(event.data.type==='roseOpenBuy'){
           try {
             const target=new URL(event.data.target);
