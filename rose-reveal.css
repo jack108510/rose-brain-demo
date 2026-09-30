@@ -20,3 +20,12 @@
 @media(max-width:390px){.rose-reveal h2{font-size:32px}}
 @media(max-width:350px){.rose-variant{--spread:32px}}
 @media(prefers-reduced-motion:reduce){.rose-variant,.rose-reveal__arch path{transition:none!important}}
+/* The live mockup stays on this page, after the Rose cards and before the brain demo. */
+.wr-inline-preview[hidden]{display:none}
+.wr-inline-preview{position:relative;z-index:4;width:min(1120px,100%);margin:38px auto 0;overflow:hidden;border:1px solid #996a51;border-radius:17px;background:#fbf7f1;box-shadow:0 28px 65px #0008;text-align:left;scroll-margin-top:24px}
+.wr-inline-preview__bar{display:flex;align-items:center;gap:14px;min-height:47px;padding:8px 16px;background:#382419;color:#fff0e7;font-size:13px}
+.wr-inline-preview__bar strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:650}
+.wr-inline-preview__dots{flex:none;color:#ffac7e;font-size:10px;letter-spacing:3px}
+.wr-inline-preview__bar button{flex:none;margin-left:auto;border:1px solid #a2755c;border-radius:7px;padding:5px 10px;background:transparent;color:#fff0e7;font-size:12px}
+.wr-inline-preview iframe{display:block;width:100%;height:min(1050px,88vh);min-height:610px;border:0;background:#fbf7f1}
+@media(max-width:760px){.wr-inline-preview{margin-top:22px;border-radius:11px}.wr-inline-preview__bar{gap:8px;padding:8px}.wr-inline-preview__dots{letter-spacing:0}.wr-inline-preview__bar strong{font-size:11px}.wr-inline-preview iframe{height:83vh;min-height:600px}}

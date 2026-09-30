@@ -158,7 +158,7 @@
   </style>
   <link rel="stylesheet" href="rose-appearance.css?v=calm-1">
   <link rel="stylesheet" href="demo-layout.css?v=brain-demo-close-1">
-  <link rel="stylesheet" href="rose-reveal.css?v=section-gap-1">
+  <link rel="stylesheet" href="rose-reveal.css?v=inline-preview-1">
 </head>
 <body>
   <nav class="wr-site-nav" aria-label="Wildrose navigation">
@@ -185,15 +185,19 @@
         <label for="tryRoseWebsite">Try Rose on your website</label>
         <div class="wr-try-bar">
           <input id="tryRoseWebsite" name="website" type="text" inputmode="url" autocomplete="url" placeholder="yourwebsite.com" required maxlength="2048" aria-describedby="tryRoseNote">
-          <button type="submit">Open my demo <span aria-hidden="true">→</span></button>
+          <button type="submit">Build my preview <span aria-hidden="true">→</span></button>
         </div>
-        <p id="tryRoseNote">Enter a public website address. Your preview opens here; nothing is installed.</p>
+        <p id="tryRoseNote">Enter a public website address. Your preview appears below on this page; nothing is installed.</p>
       </form>
       <div class="rose-reveal__stage" role="img" aria-label="One orange Rose assistant expands into a lineup of seven colourful design variations">
         <svg class="rose-reveal__arch" viewBox="0 0 1000 380" preserveAspectRatio="none" aria-hidden="true"><path d="M 85 315 C 130 72, 369 20, 500 20 C 685 20, 890 90, 927 315"/></svg>
         <div class="rose-reveal__floor" aria-hidden="true"></div>
         <div id="roseRevealCards" aria-hidden="true"></div>
       </div>
+      <section class="wr-inline-preview" id="roseSitePreview" aria-label="Rose website preview" hidden>
+        <div class="wr-inline-preview__bar"><span class="wr-inline-preview__dots" aria-hidden="true">● ● ●</span><strong id="rosePreviewTitle">Building your Rose preview…</strong><button type="button" id="rosePreviewClose" aria-label="Close website preview">Close</button></div>
+        <iframe id="rosePreviewFrame" title="Rose preview for your website" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </section>
     </section>
     <section class="stage" id="stage" data-speaker="visitor" aria-labelledby="brainTitle">
       <h2 class="brain-title" id="brainTitle">Meet Rose’s brain.</h2>
@@ -2845,6 +2849,56 @@
       function next(){index=pickExample();playing=!reduced;reset()}
       reset();
     })().catch(error=>{console.error('Rose demo failed to initialize',error);document.querySelector('#flow').setAttribute('aria-label','Brain demo failed to load; reload the page');});
+  </script>
+  <script>
+    (()=>{
+      const form=document.getElementById('try-rose');
+      const input=document.getElementById('tryRoseWebsite');
+      const shell=document.getElementById('roseSitePreview');
+      const frame=document.getElementById('rosePreviewFrame');
+      const title=document.getElementById('rosePreviewTitle');
+      const builder='https://wildroseautomations.ca/ai-tool-mockup-final.html';
+      form.addEventListener('submit',event=>{
+        event.preventDefault();
+        const website=input.value.trim();
+        if(!website)return;
+        let site;
+        try { site=new URL(/^https?:\/\//i.test(website)?website:`https://${website}`); }
+        catch { input.setCustomValidity('Enter a valid website address.');input.reportValidity();return; }
+        if(!['http:','https:'].includes(site.protocol)||!site.hostname.includes('.')){
+          input.setCustomValidity('Enter a public website address.');input.reportValidity();return;
+        }
+        input.setCustomValidity('');
+        const url=new URL(builder);url.searchParams.set('website',site.href);url.searchParams.set('embed','1');
+        title.textContent=`Building Rose for ${site.hostname}…`;
+        frame.title=`Rose website preview for ${site.hostname}`;
+        shell.hidden=false;
+        frame.src=url.href;
+        shell.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+      input.addEventListener('input',()=>input.setCustomValidity(''));
+      frame.addEventListener('load',()=>{
+        if(!shell.hidden)title.textContent=frame.src.includes('buy=1')?'Choose your Rose plan':`Rose preview for ${frame.title.replace('Rose website preview for ','')}`;
+      });
+      document.getElementById('rosePreviewClose').addEventListener('click',()=>{
+        shell.hidden=true;frame.removeAttribute('src');form.scrollIntoView({behavior:'smooth',block:'center'});
+      });
+      window.addEventListener('message',event=>{
+        if(event.origin!=='https://wildroseautomations.ca'||event.source!==frame.contentWindow||!event.data||typeof event.data!=='object')return;
+        if(event.data.type==='roseOpenBuy'){
+          try {
+            const target=new URL(event.data.target);
+            if(target.origin!==new URL(builder).origin||target.pathname!==new URL(builder).pathname||target.searchParams.get('buy')!=='1')return;
+            title.textContent='Choose your Rose plan';
+            frame.src=target.href;
+            shell.scrollIntoView({behavior:'smooth',block:'start'});
+          } catch { /* Ignore malformed messages. */ }
+        }
+        if(event.data.type==='roseCheckoutRedirect'){
+          try {const target=new URL(event.data.target);if(target.protocol==='https:')window.location.assign(target.href)}catch { /* Ignore malformed messages. */ }
+        }
+      });
+    })();
   </script>
 </body>
 </html>
